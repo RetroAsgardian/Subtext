@@ -1,2 +1,4 @@
 *.creds
 web-ui/*
+tools/.mypy_cache
+__pycache__

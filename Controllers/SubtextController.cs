@@ -503,15 +503,17 @@ namespace Subtext.Controllers {
 				return (SessionVerificationResult.SessionNotFound, null);
 			}
 			
+			if (session.Timestamp + Subtext.Config.sessionDuration < DateTime.UtcNow) {
+				context.Sessions.Remove(session);
+				await context.SaveChangesAsync();
+				return (SessionVerificationResult.SessionExpired, session);
+			}
+			
 			await context.Entry(session).Reference(s => s.User).LoadAsync();
 			User user = session.User;
 			if (user == null) {
 				// This should never happen
 				return (SessionVerificationResult.UserNotFound, session);
-			}
-			
-			if (session.Timestamp + Subtext.Config.sessionDuration < DateTime.UtcNow) {
-				return (SessionVerificationResult.SessionExpired, session);
 			}
 			
 			return (SessionVerificationResult.Success, session);
@@ -525,8 +527,30 @@ namespace Subtext.Controllers {
 			
 			(SessionVerificationResult verificationResult, Session session) = await VerifySession(sessionId);
 			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(404, result);
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(500, result);
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					result.Add("error", "SessionExpired");
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, result);
+				}
+				
+				result.Add("error", "AuthError");
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, result);
+			}
 			
+			session.Timestamp = DateTime.UtcNow;
+			await context.SaveChangesAsync();
 			
+			result.Add("success", true);
 			return StatusCode(200, result);
 		}
 		

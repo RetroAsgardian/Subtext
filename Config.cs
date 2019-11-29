@@ -1,0 +1,45 @@
+using System;
+using System.Collections.Generic;
+
+namespace Subtext {
+	
+	public class Config {
+		
+		// Server name. Used to identify this server.
+		public static string serverName = "SubtextOfficial";
+		
+		// If this is enabled, users will be locked until they are manually
+		// verified by the admins.
+		public static bool serverIsPrivate = false;
+		
+		// Size (in bytes) of secrets, salts, challenges, and responses
+		// This should be AT LEAST 16. 32 should be way more than enough.
+		public static int secretSize = 32;
+		
+		// You probably shouldn't touch this.
+		public static int pbkdf2Iterations = 10000;
+		
+		// Maximum amount of time an admin session can go without being renewed.
+		// This should be very short (1-5 minutes) for optimal security.
+		public static TimeSpan adminSessionDuration = TimeSpan.FromMinutes(2);
+		
+		// Maximum amount of time a user session can go without being renewed.
+		public static TimeSpan sessionDuration = TimeSpan.FromMinutes(15);
+		
+		// SQL server connection options
+		// Subtext uses Microsoft SQL Server by default. If you want to use
+		// a different SQL server, you'll need to edit ConfigureServices()
+		// in Startup.cs.
+		public static string sqlServer = "localhost";
+		public static string sqlDatabase = "Subtext";
+		public static string sqlUser = "SubtextLogin";
+		public static string sqlPassword = "deFh0KrHc5HYhJrV";
+		
+		// Maximum amount of results returned by a query.
+		public static int pageSize = 500;
+		
+		public static int passwordMinLength = 10;
+		
+	}
+	
+}

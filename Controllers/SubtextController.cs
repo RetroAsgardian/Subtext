@@ -554,5 +554,36 @@ namespace Subtext.Controllers {
 			return StatusCode(200, result);
 		}
 		
+		[HttpPost("user/logout")]
+		public async Task<ActionResult<Dictionary<string, object>>> UserLogout(
+			Guid sessionId
+		) {
+			Dictionary<string, object> result = new Dictionary<string, object>();
+			
+			Session session = await context.Sessions.FindAsync(sessionId);
+			if (session == null) {
+				result.Add("error", "NoObjectWithId");
+				return StatusCode(404, result);
+			}
+			
+			await context.Entry(session).Reference(s => s.User).LoadAsync();
+			
+			User user = session.User;
+			if (user == null) {
+				result.Add("error", "NoObjectWithId");
+				return StatusCode(500, result);
+			}
+			
+			context.Sessions.Remove(session);
+			if (await context.Sessions.Where(s => s.User == user && s.Timestamp + Subtext.Config.sessionDuration >= DateTime.UtcNow).CountAsync() == 0) {
+				user.Presence = UserPresence.Offline;
+			}
+			
+			await context.SaveChangesAsync();
+			
+			result.Add("success", true);
+			return StatusCode(200, result);
+		}
+		
 	}
 }

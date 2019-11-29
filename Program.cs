@@ -12,6 +12,8 @@ namespace Subtext {
 		public static readonly string version = "0.1.0";
 		
 		public static void Main(string[] args) {
+			Config.Init();
+			
 			CreateHostBuilder(args).Build().Run();
 		}
 		

@@ -23,6 +23,7 @@ namespace Subtext {
 		
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services) {
+			
 			services.AddDbContext<ChatContext>((DbContextOptionsBuilder opt) => {
 				opt.UseSqlServer("Server=" + Config.sqlServer + ";Database=" + Config.sqlDatabase + ";User Id=" + Config.sqlUser + ";Password=" + Config.sqlPassword);
 			});

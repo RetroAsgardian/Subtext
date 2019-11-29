@@ -15,11 +15,13 @@ namespace Subtext {
 		public static bool serverIsPrivate = false;
 		
 		// Size (in bytes) of secrets, salts, challenges, and responses
-		// This should be AT LEAST 16. 32 should be way more than enough.
+		// This should be AT LEAST 16. 32 should be more than enough.
 		public static int secretSize = 32;
 		
 		// You probably shouldn't touch this.
 		public static int pbkdf2Iterations = 10000;
+		
+		public static int passwordMinLength = 10;
 		
 		// Maximum amount of time an admin session can go without being renewed.
 		// This should be very short (1-5 minutes) for optimal security.
@@ -38,8 +40,6 @@ namespace Subtext {
 		
 		// Maximum amount of results returned by a query.
 		public static int pageSize = 500;
-		
-		public static int passwordMinLength = 10;
 		
 		
 		

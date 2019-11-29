@@ -36,6 +36,7 @@ namespace Subtext {
 		// in Startup.cs.
 		public static string sqlServer = "localhost";
 		public static string sqlDatabase = "Subtext";
+		// This is a text file with the username on the first line, and the password on the second.
 		public static string sqlCredsFile = "db.creds";
 		
 		// Maximum amount of results returned by a query.
@@ -49,6 +50,7 @@ namespace Subtext {
 		public static string sqlPassword;
 		
 		public static void Init() {
+			
 			// Read SQL username and password from creds file
 			using (StreamReader fh = new StreamReader(sqlCredsFile)) {
 				sqlUser = fh.ReadLine().Trim();

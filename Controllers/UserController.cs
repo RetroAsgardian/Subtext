@@ -92,10 +92,10 @@ namespace Subtext.Controllers {
 			
 			result.Add("userId", user.Id);
 			
-			return StatusCode(200, result);
+			return StatusCode(201, result);
 		}
 		
-		[HttpPost("queryIdByName")]
+		[HttpGet("queryIdByName")]
 		public async Task<ActionResult<Dictionary<string, object>>> QueryIdByName(
 			string name
 		) {

@@ -12,6 +12,7 @@ This repository contains the server code for Subtext.
 - That's it
 
 ## Installing
+(TODO fill out this section)
 
 ## Forking Etiquette
 If you create a fork, please change `variant` in `Program.cs` to your repository name. This helps us understand and solve bug reports involving unofficial server variants, and informs users about the code running on each instance.

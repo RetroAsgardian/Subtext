@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Subtext {
 	public class Program {
 		public static readonly string version = "0.1.0";
-		public static readonly string variant = "Official";
+		public static readonly string variant = "RetroAsgardian/Subtext";
 		
 		public static void Main(string[] args) {
 			Config.Init();

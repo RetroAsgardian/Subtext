@@ -8,7 +8,7 @@ namespace Subtext {
 	public class Config {
 		
 		// Server name. Used to identify this server.
-		public static string serverName = "SubtextOfficial";
+		public static string serverName = "subtext_testing";
 		
 		// If this is enabled, users will be locked until they are manually
 		// verified by the admins.

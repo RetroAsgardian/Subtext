@@ -34,7 +34,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("create")]
-		public async Task<ActionResult<Dictionary<string, object>>> Create(
+		public async Task<ActionResult> Create(
 			string name,
 			string password
 			// byte[] publicKey = null
@@ -98,7 +98,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("queryIdByName")]
-		public async Task<ActionResult<Dictionary<string, object>>> QueryIdByName(
+		public async Task<ActionResult> QueryIdByName(
 			string name
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
@@ -116,7 +116,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("login")]
-		public async Task<ActionResult<Dictionary<string, object>>> Login(
+		public async Task<ActionResult> Login(
 			Guid userId,
 			string password
 		) {
@@ -212,7 +212,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("heartbeat")]
-		public async Task<ActionResult<Dictionary<string, object>>> Heartbeat(
+		public async Task<ActionResult> Heartbeat(
 			Guid sessionId
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
@@ -244,7 +244,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("logout")]
-		public async Task<ActionResult<Dictionary<string, object>>> Logout(
+		public async Task<ActionResult> Logout(
 			Guid sessionId
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
@@ -277,7 +277,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{userId}")]
-		public async Task<ActionResult<Dictionary<string, object>>> GetUser(
+		public async Task<ActionResult> GetUser(
 			Guid sessionId,
 			Guid userId
 		) {

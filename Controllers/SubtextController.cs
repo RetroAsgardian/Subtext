@@ -52,7 +52,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("")]
-		public ActionResult<Dictionary<string, object>> About() {
+		public ActionResult About() {
 			Dictionary<string, object> result = new Dictionary<string, object>();
 			
 			result.Add("version", Subtext.Program.version);

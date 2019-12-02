@@ -21,7 +21,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("login/challenge")]
-		public async Task<ActionResult<Dictionary<string, object>>> LoginChallenge(
+		public async Task<ActionResult> LoginChallenge(
 			Guid adminId
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
@@ -49,7 +49,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("login/response")]
-		public async Task<ActionResult<Dictionary<string, object>>> LoginResponse(
+		public async Task<ActionResult> LoginResponse(
 			Guid adminId,
 			[FromQuery] byte[] response
 		) {
@@ -172,7 +172,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("renew")]
-		public async Task<ActionResult<Dictionary<string, object>>> Renew(
+		public async Task<ActionResult> Renew(
 			Guid sessionId
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
@@ -211,7 +211,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("logout")]
-		public async Task<ActionResult<Dictionary<string, object>>> Logout(
+		public async Task<ActionResult> Logout(
 			Guid sessionId
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
@@ -242,7 +242,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("auditlog")]
-		public async Task<ActionResult<Dictionary<string, object>>> AuditLog(
+		public async Task<ActionResult> AuditLog(
 			Guid sessionId,
 			int? start = null,
 			int? count = null,

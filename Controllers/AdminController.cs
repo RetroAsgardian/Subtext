@@ -24,28 +24,22 @@ namespace Subtext.Controllers {
 		public async Task<ActionResult> LoginChallenge(
 			Guid adminId
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			Admin admin = await context.Admins.FindAsync(adminId);
 			if (admin == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			if (admin.IsLoggedIn) {
-				result.Add("error", "AdminLoggedIn");
-				return StatusCode(403, result);
+				return StatusCode(403, new APIError("AdminLoggedIn"));
 			}
 			
 			byte[] challenge = new byte[Subtext.Config.secretSize];
 			rng.GetBytes(challenge);
 			admin.Challenge = challenge;
 			
-			result.Add("challenge", challenge);
-			
 			await context.SaveChangesAsync();
 			
-			return StatusCode(200, result);
+			return StatusCode(200, challenge);
 		}
 		
 		[HttpPost("login/response")]

@@ -32,6 +32,11 @@ namespace Subtext {
 			services.AddDbContext<ChatContext>((DbContextOptionsBuilder opt) => {
 				opt.UseSqlServer("Server=" + Config.sqlServer + ";Database=" + Config.sqlDatabase + ";User Id=" + Config.sqlUser + ";Password=" + Config.sqlPassword);
 			});
+			
+			services.AddMvc((MvcOptions opt) => {
+				opt.InputFormatters.Insert(0, new Subtext.Formatters.BinaryInputFormatter());
+			});
+			
 			services.AddControllers();
 		}
 		

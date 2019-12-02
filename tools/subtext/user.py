@@ -22,7 +22,7 @@ class UserAPI:
 		resp = requests.post(self.url + "/Subtext/user/create", data=public_key, params={
 			'name': name,
 			'password': password
-		})
+		}, headers={'Content-Type': 'application/octet-stream'})
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
@@ -112,6 +112,37 @@ class UserAPI:
 		resp = requests.get(self.url + "/Subtext/user/{}/friendrequests".format(user_id), params={
 			'sessionId': session_id
 		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
+	def get_user_keys(self, session_id: UUID, user_id: UUID):
+		resp = requests.get(self.url + "/Subtext/user/{}/keys".format(user_id), params={
+			'sessionId': session_id
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
+	def get_user_key(self, key_id: UUID):
+		resp = requests.get(self.url + "/Subtext/keys/{}".format(key_id))
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.content
+	
+	def post_user_key(self, session_id: UUID, user_id: UUID, public_key: bytes):
+		resp = requests.post(self.url + "/Subtext/user/{}/keys".format(user_id), data=public_key, params={
+			'sessionId': session_id
+		}, headers={'Content-Type': 'application/octet-stream'})
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)

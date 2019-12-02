@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Subtext.Models;
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 
 namespace Subtext.Controllers {
 	[Produces("application/json")]
@@ -14,8 +11,6 @@ namespace Subtext.Controllers {
 	[ApiController]
 	public class SubtextController : ControllerBase {
 		private readonly ChatContext context;
-		
-		static Regex reName = new Regex(@"^[a-z_][a-z0-9_]{4,}$", RegexOptions.Compiled);
 		
 		static RandomNumberGenerator rng = RandomNumberGenerator.Create();
 		

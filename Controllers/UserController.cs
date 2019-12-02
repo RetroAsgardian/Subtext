@@ -39,21 +39,16 @@ namespace Subtext.Controllers {
 			string password,
 			[FromBody] byte[] publicKey
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			if (await context.Users.AnyAsync(u => u.Name == name)) {
-				result.Add("error", "NameTaken");
-				return StatusCode(409, result);
+				return StatusCode(409, new APIError("NameTaken"));
 			}
 			
 			if (!reName.IsMatch(name)) {
-				result.Add("error", "NameInvalid");
-				return StatusCode(400, result);
+				return StatusCode(400, new APIError("NameInvalid"));
 			}
 			
 			if (password.Length < Subtext.Config.passwordMinLength) {
-				result.Add("error", "PasswordInsecure");
-				return StatusCode(400, result);
+				return StatusCode(400, new APIError("PasswordInsecure"));
 			}
 			
 			User user = new User();
@@ -92,27 +87,20 @@ namespace Subtext.Controllers {
 			
 			await context.SaveChangesAsync();
 			
-			result.Add("userId", user.Id);
-			
-			return StatusCode(201, result);
+			return StatusCode(201, user.Id);
 		}
 		
 		[HttpGet("queryidbyname")]
 		public async Task<ActionResult> QueryIdByName(
 			string name
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			if (!(await context.Users.AnyAsync(u => u.Name == name))) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			User user = await context.Users.FirstOrDefaultAsync(u => u.Name == name);
 			
-			result.Add("id", user.Id);
-			
-			return StatusCode(200, result);
+			return StatusCode(200, user.Id);
 		}
 		
 		[HttpPost("login")]
@@ -120,17 +108,13 @@ namespace Subtext.Controllers {
 			Guid userId,
 			string password
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			if (user.IsDeleted) {
-				result.Add("error", "ObjectDeleted");
-				return StatusCode(410, result);
+				return StatusCode(410, new APIError("ObjectDeleted"));
 			}
 			
 			if (user.IsLocked) {
@@ -138,10 +122,7 @@ namespace Subtext.Controllers {
 					user.IsLocked = false;
 					await context.SaveChangesAsync();
 				}
-				result.Add("error", "UserLocked");
-				result.Add("lockReason", user.LockReason);
-				result.Add("lockExpiry", user.LockExpiry);
-				return StatusCode(403, result);
+				return StatusCode(403, new {error = "UserLocked", lockReason = user.LockReason, lockExpiry = user.LockExpiry});
 			}
 			
 			bool passwordMatch = false;
@@ -161,9 +142,8 @@ namespace Subtext.Controllers {
 			}
 			
 			if (!passwordMatch) {
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
 			Session session = new Session();
@@ -176,8 +156,7 @@ namespace Subtext.Controllers {
 			await context.Sessions.AddAsync(session);
 			await context.SaveChangesAsync();
 			
-			result.Add("sessionId", session.Id);
-			return StatusCode(200, result);
+			return StatusCode(200, session.Id);
 		}
 		
 		async Task<(SessionVerificationResult, Session)> VerifySession(Guid sessionId) {
@@ -215,52 +194,41 @@ namespace Subtext.Controllers {
 		public async Task<ActionResult> Heartbeat(
 			Guid sessionId
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(404, result);
+					return StatusCode(404, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(500, result);
+					return StatusCode(500, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.SessionExpired) {
-					result.Add("error", "SessionExpired");
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-					return StatusCode(401, result);
+					return StatusCode(401, new APIError("SessionExpired"));
 				}
 				
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
-			result.Add("success", true);
-			return StatusCode(200, result);
+			return StatusCode(200, "success");
 		}
 		
 		[HttpPost("logout")]
 		public async Task<ActionResult> Logout(
 			Guid sessionId
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			Session session = await context.Sessions.FindAsync(sessionId);
 			if (session == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			await context.Entry(session).Reference(s => s.User).LoadAsync();
 			
 			User user = session.User;
 			if (user == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(500, result);
+				return StatusCode(500, new APIError("NoObjectWithId"));
 			}
 			
 			context.Sessions.Remove(session);
@@ -272,8 +240,7 @@ namespace Subtext.Controllers {
 			
 			await context.SaveChangesAsync();
 			
-			result.Add("success", true);
-			return StatusCode(200, result);
+			return StatusCode(200, "success");
 		}
 		
 		[HttpGet("{userId}")]
@@ -281,39 +248,30 @@ namespace Subtext.Controllers {
 			Guid sessionId,
 			Guid userId
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(404, result);
+					return StatusCode(404, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(500, result);
+					return StatusCode(500, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.SessionExpired) {
-					result.Add("error", "SessionExpired");
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-					return StatusCode(401, result);
+					return StatusCode(401, new APIError("SessionExpired"));
 				}
 				
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
-			result.Add("user", new {user.Id, user.Name, user.Presence, user.LastActive, user.Status, user.IsLocked, user.LockReason, user.LockExpiry, user.IsDeleted});
-			
-			return StatusCode(200, result);
+			return StatusCode(200, new {user.Id, user.Name, user.Presence, user.LastActive, user.Status, user.IsLocked, user.LockReason, user.LockExpiry, user.IsDeleted});
 		}
 		
 		[HttpGet("{userId}/friends")]
@@ -323,34 +281,27 @@ namespace Subtext.Controllers {
 			int? start = null,
 			int? count = null
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(404, result);
+					return StatusCode(404, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(500, result);
+					return StatusCode(500, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.SessionExpired) {
-					result.Add("error", "SessionExpired");
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-					return StatusCode(401, result);
+					return StatusCode(401, new APIError("SessionExpired"));
 				}
 				
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			if (start.HasValue && start < 0) {
@@ -361,14 +312,13 @@ namespace Subtext.Controllers {
 				count = Subtext.Config.pageSize;
 			}
 			
-			result.Add("friends", await context.FriendRecords
+			return StatusCode(200, await context.FriendRecords
 				.Where(fr => fr.OwnerId == user.Id)
+				.OrderBy(fr => fr.FriendId)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
 				.Select(fr => fr.FriendId)
 				.ToListAsync());
-			
-			return StatusCode(200, result);
 		}
 		
 		[HttpGet("{userId}/blocked")]
@@ -378,34 +328,27 @@ namespace Subtext.Controllers {
 			int? start = null,
 			int? count = null
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(404, result);
+					return StatusCode(404, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(500, result);
+					return StatusCode(500, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.SessionExpired) {
-					result.Add("error", "SessionExpired");
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-					return StatusCode(401, result);
+					return StatusCode(401, new APIError("SessionExpired"));
 				}
 				
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			if (start.HasValue && start < 0) {
@@ -416,14 +359,13 @@ namespace Subtext.Controllers {
 				count = Subtext.Config.pageSize;
 			}
 			
-			result.Add("blocked", await context.BlockRecords
+			return StatusCode(200, await context.BlockRecords
 				.Where(br => br.OwnerId == user.Id)
+				.OrderBy(br => br.BlockedId)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
 				.Select(br => br.BlockedId)
 				.ToListAsync());
-			
-			return StatusCode(200, result);
 		}
 		
 		[HttpGet("{userId}/friendrequests")]
@@ -433,34 +375,27 @@ namespace Subtext.Controllers {
 			int? start = null,
 			int? count = null
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(404, result);
+					return StatusCode(404, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(500, result);
+					return StatusCode(500, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.SessionExpired) {
-					result.Add("error", "SessionExpired");
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-					return StatusCode(401, result);
+					return StatusCode(401, new APIError("SessionExpired"));
 				}
 				
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			if (start.HasValue && start < 0) {
@@ -471,14 +406,99 @@ namespace Subtext.Controllers {
 				count = Subtext.Config.pageSize;
 			}
 			
-			result.Add("friendRequests", await context.FriendRequests
+			return StatusCode(200, await context.FriendRequests
 				.Where(fr => fr.RecipientId == user.Id)
+				.OrderBy(fr => fr.SenderId)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
 				.Select(fr => fr.SenderId)
 				.ToListAsync());
+		}
+		
+		[HttpGet("{userId}/keys")]
+		public async Task<ActionResult> GetUserKeys(
+			Guid sessionId,
+			Guid userId,
+			int? start = null,
+			int? count = null
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
-			return StatusCode(200, result);
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			User user = await context.Users.FindAsync(userId);
+			if (user == null) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			if (start.HasValue && start < 0) {
+				start = 0;
+			}
+			
+			if (count.HasValue && count <= 0) {
+				count = Subtext.Config.pageSize;
+			}
+			
+			return StatusCode(200, await context.PublicKeys
+				.Where(pk => pk.OwnerId == user.Id)
+				.OrderByDescending(pk => pk.PublishTime)
+				.Skip(start.GetValueOrDefault(0))
+				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Select(pk => new {pk.Id, pk.PublishTime})
+				.ToListAsync());
+		}
+		
+		[HttpPost("{userId}/keys")]
+		public async Task<ActionResult> PostUserKey(
+			Guid sessionId,
+			Guid userId,
+			[FromBody] byte[] publicKey
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			PublicKey key = new PublicKey();
+			key.Owner = session.User;
+			key.PublishTime = DateTime.UtcNow;
+			key.KeyData = publicKey;
+			
+			await context.PublicKeys.AddAsync(key);
+			await context.SaveChangesAsync();
+			
+			return StatusCode(201, key.Id);
 		}
 		
 	}

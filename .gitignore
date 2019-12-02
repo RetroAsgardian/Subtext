@@ -1,4 +1,6 @@
 *.creds
+obj/*
+bin/*
 web-ui/*
 tools/.mypy_cache
 __pycache__

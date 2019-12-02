@@ -21,7 +21,7 @@ namespace Subtext {
 		// You probably shouldn't touch this.
 		public static int pbkdf2Iterations = 10000;
 		
-		public static int passwordMinLength = 10;
+		public static int passwordMinLength = 8;
 		
 		// Maximum amount of time an admin session can go without being renewed.
 		// This should be very short (1-5 minutes) for optimal security.

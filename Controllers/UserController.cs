@@ -36,8 +36,8 @@ namespace Subtext.Controllers {
 		[HttpPost("create")]
 		public async Task<ActionResult<Dictionary<string, object>>> Create(
 			string name,
-			string password,
-			byte[] publicKey = null
+			string password
+			// byte[] publicKey = null
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
 			
@@ -81,14 +81,14 @@ namespace Subtext.Controllers {
 			
 			await context.Users.AddAsync(user);
 			
-			if (publicKey != null) {
+			/* if (publicKey != null) {
 				PublicKey key = new PublicKey();
 				key.Owner = user;
 				key.PublishTime = DateTime.UtcNow;
 				key.KeyData = publicKey;
 				
 				await context.PublicKeys.AddAsync(key);
-			}
+			} */
 			
 			await context.SaveChangesAsync();
 			
@@ -264,7 +264,9 @@ namespace Subtext.Controllers {
 			}
 			
 			context.Sessions.Remove(session);
-			if (await context.Sessions.Where(s => s.User == user && s.Timestamp + Subtext.Config.sessionDuration >= DateTime.UtcNow).CountAsync() == 0) {
+			
+			DateTime expiryCutoff = DateTime.UtcNow.Subtract(Subtext.Config.sessionDuration);
+			if (await context.Sessions.Where(s => s.UserId == user.Id && s.Timestamp >= expiryCutoff).CountAsync() == 0) {
 				user.Presence = UserPresence.Offline;
 			}
 			

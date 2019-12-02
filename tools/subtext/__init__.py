@@ -5,6 +5,7 @@ subtext - Python library for the Subtext API
 import requests
 
 from . import admin
+from . import user
 from .common import _assert_compatibility, VersionError, APIError, PagedList, Translator
 
 VERSION = "0.1.0"
@@ -29,6 +30,7 @@ class Subtext:
 		self.config.update(config)
 		
 		self.admin = admin.AdminAPI(self.url, self.version, **self.config)
+		self.user = user.UserAPI(self.url, self.version, **self.config)
 	
 	def about(self):
 		"""

@@ -37,7 +37,7 @@ namespace Subtext.Controllers {
 		public async Task<ActionResult<Dictionary<string, object>>> Create(
 			string name,
 			string password,
-			byte[] publicKey
+			byte[] publicKey = null
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
 			
@@ -81,12 +81,14 @@ namespace Subtext.Controllers {
 			
 			await context.Users.AddAsync(user);
 			
-			PublicKey key = new PublicKey();
-			key.Owner = user;
-			key.PublishTime = DateTime.UtcNow;
-			key.KeyData = publicKey;
-			
-			await context.PublicKeys.AddAsync(key);
+			if (publicKey != null) {
+				PublicKey key = new PublicKey();
+				key.Owner = user;
+				key.PublishTime = DateTime.UtcNow;
+				key.KeyData = publicKey;
+				
+				await context.PublicKeys.AddAsync(key);
+			}
 			
 			await context.SaveChangesAsync();
 			
@@ -272,9 +274,10 @@ namespace Subtext.Controllers {
 			return StatusCode(200, result);
 		}
 		
-		[HttpGet("self")]
-		public async Task<ActionResult<Dictionary<string, object>>> Self(
-			Guid sessionId
+		[HttpGet("{userId}")]
+		public async Task<ActionResult<Dictionary<string, object>>> GetUser(
+			Guid sessionId,
+			Guid userId
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
 			
@@ -300,7 +303,14 @@ namespace Subtext.Controllers {
 				return StatusCode(401, result);
 			}
 			
-			result.Add("success", true);
+			User user = await context.Users.FindAsync(userId);
+			if (user == null) {
+				result.Add("error", "NoObjectWithId");
+				return StatusCode(404, result);
+			}
+			
+			result.Add("user", new {user.Id, user.Name, user.Presence, user.LastActive, user.Status, user.IsLocked, user.LockReason, user.LockExpiry, user.IsDeleted});
+			
 			return StatusCode(200, result);
 		}
 		

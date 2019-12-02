@@ -9,7 +9,6 @@
 /home/retroasgardian/projects/Subtext/obj/Debug/netcoreapp3.0/Subtext.csprojAssemblyReference.cache
 /home/retroasgardian/projects/Subtext/obj/Debug/netcoreapp3.0/staticwebassets/Subtext.StaticWebAssets.Manifest.cache
 /home/retroasgardian/projects/Subtext/obj/Debug/netcoreapp3.0/staticwebassets/Subtext.StaticWebAssets.xml
-/home/retroasgardian/projects/Subtext/obj/Debug/netcoreapp3.0/Subtext.MvcApplicationPartsAssemblyInfo.cs
 /home/retroasgardian/projects/Subtext/obj/Debug/netcoreapp3.0/Subtext.MvcApplicationPartsAssemblyInfo.cache
 /home/retroasgardian/projects/Subtext/obj/Debug/netcoreapp3.0/Subtext.AssemblyInfoInputs.cache
 /home/retroasgardian/projects/Subtext/obj/Debug/netcoreapp3.0/Subtext.AssemblyInfo.cs
@@ -29,17 +28,6 @@
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.EntityFrameworkCore.InMemory.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.EntityFrameworkCore.Relational.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.EntityFrameworkCore.SqlServer.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Caching.Abstractions.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Caching.Memory.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Configuration.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Configuration.Abstractions.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Configuration.Binder.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.DependencyInjection.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Logging.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Logging.Abstractions.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Options.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Extensions.Primitives.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.Identity.Client.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.VisualStudio.Web.CodeGeneration.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.VisualStudio.Web.CodeGeneration.Contracts.dll
@@ -51,15 +39,12 @@
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Microsoft.VisualStudio.Web.CodeGenerators.Mvc.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Newtonsoft.Json.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/NuGet.Frameworks.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Collections.Immutable.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.ComponentModel.Annotations.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Composition.AttributedModel.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Composition.Convention.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Composition.Hosting.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Composition.Runtime.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Composition.TypedParts.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Configuration.ConfigurationManager.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Diagnostics.DiagnosticSource.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Runtime.Caching.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Security.Cryptography.ProtectedData.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/cs/Microsoft.CodeAnalysis.resources.dll
@@ -131,7 +116,6 @@
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/SQLitePCLRaw.nativelibrary.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/SQLitePCLRaw.core.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/SQLitePCLRaw.provider.dynamic_cdecl.dll
-/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/System.Text.Json.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/runtimes/alpine-x64/native/libe_sqlite3.so
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/runtimes/linux-arm/native/libe_sqlite3.so
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/runtimes/linux-arm64/native/libe_sqlite3.so
@@ -144,3 +128,4 @@
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/runtimes/win-arm64/native/e_sqlite3.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/runtimes/win-x64/native/e_sqlite3.dll
 /home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/runtimes/win-x86/native/e_sqlite3.dll
+/home/retroasgardian/projects/Subtext/bin/Debug/netcoreapp3.0/Properties/launchSettings.json

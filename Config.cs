@@ -49,14 +49,13 @@ namespace Subtext {
 		public static string sqlUser;
 		public static string sqlPassword;
 		
-		private static bool initialized = false;
-		
-		public static bool IsInit { get { return initialized; } }
+		public static bool IsInit { get; private set; }
 		
 		public static void Init() {
 			InitCreds();
+			// TODO initialize more stuff?
 			
-			initialized = true;
+			IsInit = true;
 		}
 		
 		public static void InitCreds() {

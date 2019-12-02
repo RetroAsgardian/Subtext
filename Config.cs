@@ -49,8 +49,17 @@ namespace Subtext {
 		public static string sqlUser;
 		public static string sqlPassword;
 		
+		private static bool initialized = false;
+		
+		public static bool IsInit { get { return initialized; } }
+		
 		public static void Init() {
+			InitCreds();
 			
+			initialized = true;
+		}
+		
+		public static void InitCreds() {
 			// Read SQL username and password from creds file
 			using (StreamReader fh = new StreamReader(sqlCredsFile)) {
 				sqlUser = fh.ReadLine().Trim();

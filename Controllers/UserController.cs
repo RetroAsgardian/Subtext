@@ -200,13 +200,22 @@ namespace Subtext.Controllers {
 			return (SessionVerificationResult.Success, session);
 		}
 		
+		async Task<(SessionVerificationResult, Session)> VerifyAndRenewSession(Guid sessionId) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifySession(sessionId);
+			if (verificationResult == SessionVerificationResult.Success) {
+				session.Timestamp = DateTime.UtcNow;
+				await context.SaveChangesAsync();
+			}
+			return (verificationResult, session);
+		}
+		
 		[HttpPost("heartbeat")]
 		public async Task<ActionResult<Dictionary<string, object>>> Heartbeat(
 			Guid sessionId
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
 			
-			(SessionVerificationResult verificationResult, Session session) = await VerifySession(sessionId);
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
@@ -227,9 +236,6 @@ namespace Subtext.Controllers {
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, result);
 			}
-			
-			session.Timestamp = DateTime.UtcNow;
-			await context.SaveChangesAsync();
 			
 			result.Add("success", true);
 			return StatusCode(200, result);
@@ -261,6 +267,38 @@ namespace Subtext.Controllers {
 			}
 			
 			await context.SaveChangesAsync();
+			
+			result.Add("success", true);
+			return StatusCode(200, result);
+		}
+		
+		[HttpGet("self")]
+		public async Task<ActionResult<Dictionary<string, object>>> Self(
+			Guid sessionId
+		) {
+			Dictionary<string, object> result = new Dictionary<string, object>();
+			
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(404, result);
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(500, result);
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					result.Add("error", "SessionExpired");
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, result);
+				}
+				
+				result.Add("error", "AuthError");
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, result);
+			}
 			
 			result.Add("success", true);
 			return StatusCode(200, result);

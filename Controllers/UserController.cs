@@ -36,8 +36,8 @@ namespace Subtext.Controllers {
 		[HttpPost("create")]
 		public async Task<ActionResult> Create(
 			string name,
-			string password
-			// byte[] publicKey = null
+			string password,
+			[FromBody] byte[] publicKey
 		) {
 			Dictionary<string, object> result = new Dictionary<string, object>();
 			
@@ -81,14 +81,14 @@ namespace Subtext.Controllers {
 			
 			await context.Users.AddAsync(user);
 			
-			/* if (publicKey != null) {
+			if (publicKey.Length > 0) {
 				PublicKey key = new PublicKey();
 				key.Owner = user;
 				key.PublishTime = DateTime.UtcNow;
 				key.KeyData = publicKey;
 				
 				await context.PublicKeys.AddAsync(key);
-			} */
+			}
 			
 			await context.SaveChangesAsync();
 			
@@ -97,7 +97,7 @@ namespace Subtext.Controllers {
 			return StatusCode(201, result);
 		}
 		
-		[HttpGet("queryIdByName")]
+		[HttpGet("queryidbyname")]
 		public async Task<ActionResult> QueryIdByName(
 			string name
 		) {
@@ -312,6 +312,171 @@ namespace Subtext.Controllers {
 			}
 			
 			result.Add("user", new {user.Id, user.Name, user.Presence, user.LastActive, user.Status, user.IsLocked, user.LockReason, user.LockExpiry, user.IsDeleted});
+			
+			return StatusCode(200, result);
+		}
+		
+		[HttpGet("{userId}/friends")]
+		public async Task<ActionResult> GetUserFriends(
+			Guid sessionId,
+			Guid userId,
+			int? start = null,
+			int? count = null
+		) {
+			Dictionary<string, object> result = new Dictionary<string, object>();
+			
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(404, result);
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(500, result);
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					result.Add("error", "SessionExpired");
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, result);
+				}
+				
+				result.Add("error", "AuthError");
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, result);
+			}
+			
+			User user = await context.Users.FindAsync(userId);
+			if (user == null) {
+				result.Add("error", "NoObjectWithId");
+				return StatusCode(404, result);
+			}
+			
+			if (start.HasValue && start < 0) {
+				start = 0;
+			}
+			
+			if (count.HasValue && count <= 0) {
+				count = Subtext.Config.pageSize;
+			}
+			
+			result.Add("friends", await context.FriendRecords
+				.Where(fr => fr.OwnerId == user.Id)
+				.Skip(start.GetValueOrDefault(0))
+				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Select(fr => fr.FriendId)
+				.ToListAsync());
+			
+			return StatusCode(200, result);
+		}
+		
+		[HttpGet("{userId}/blocked")]
+		public async Task<ActionResult> GetUserBlocked(
+			Guid sessionId,
+			Guid userId,
+			int? start = null,
+			int? count = null
+		) {
+			Dictionary<string, object> result = new Dictionary<string, object>();
+			
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(404, result);
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(500, result);
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					result.Add("error", "SessionExpired");
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, result);
+				}
+				
+				result.Add("error", "AuthError");
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, result);
+			}
+			
+			User user = await context.Users.FindAsync(userId);
+			if (user == null) {
+				result.Add("error", "NoObjectWithId");
+				return StatusCode(404, result);
+			}
+			
+			if (start.HasValue && start < 0) {
+				start = 0;
+			}
+			
+			if (count.HasValue && count <= 0) {
+				count = Subtext.Config.pageSize;
+			}
+			
+			result.Add("blocked", await context.BlockRecords
+				.Where(br => br.OwnerId == user.Id)
+				.Skip(start.GetValueOrDefault(0))
+				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Select(br => br.BlockedId)
+				.ToListAsync());
+			
+			return StatusCode(200, result);
+		}
+		
+		[HttpGet("{userId}/friendrequests")]
+		public async Task<ActionResult> GetUserFriendRequests(
+			Guid sessionId,
+			Guid userId,
+			int? start = null,
+			int? count = null
+		) {
+			Dictionary<string, object> result = new Dictionary<string, object>();
+			
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(404, result);
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					result.Add("error", "NoObjectWithId");
+					return StatusCode(500, result);
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					result.Add("error", "SessionExpired");
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, result);
+				}
+				
+				result.Add("error", "AuthError");
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, result);
+			}
+			
+			User user = await context.Users.FindAsync(userId);
+			if (user == null) {
+				result.Add("error", "NoObjectWithId");
+				return StatusCode(404, result);
+			}
+			
+			if (start.HasValue && start < 0) {
+				start = 0;
+			}
+			
+			if (count.HasValue && count <= 0) {
+				count = Subtext.Config.pageSize;
+			}
+			
+			result.Add("friendRequests", await context.FriendRequests
+				.Where(fr => fr.RecipientId == user.Id)
+				.Skip(start.GetValueOrDefault(0))
+				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Select(fr => fr.SenderId)
+				.ToListAsync());
 			
 			return StatusCode(200, result);
 		}

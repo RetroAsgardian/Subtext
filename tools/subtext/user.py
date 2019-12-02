@@ -18,12 +18,12 @@ class UserAPI:
 		self.version = version
 		self.config = config
 	
-	def create(self, name: str, password: str, public_key: Optional[bytes] = None):
-		resp = requests.post(self.url + "/Subtext/user/create", params={
+	def create(self, name: str, password: str, public_key: bytes = bytes(0)):
+		resp = requests.post(self.url + "/Subtext/user/create", data=public_key, params={
 			'name': name,
 			'password': password
 		})
-		if resp.status_code != 201:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -31,10 +31,10 @@ class UserAPI:
 		return resp.json()
 	
 	def query_id_by_name(self, name: str):
-		resp = requests.get(self.url + "/Subtext/user/queryIdByName", params={
+		resp = requests.get(self.url + "/Subtext/user/queryidbyname", params={
 			'name': name
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -46,7 +46,7 @@ class UserAPI:
 			'userId': user_id,
 			'password': password
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -57,7 +57,7 @@ class UserAPI:
 		resp = requests.post(self.url + "/Subtext/user/heartbeat", params={
 			'sessionId': session_id
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -68,7 +68,7 @@ class UserAPI:
 		resp = requests.post(self.url + "/Subtext/user/logout", params={
 			'sessionId': session_id
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -79,10 +79,42 @@ class UserAPI:
 		resp = requests.get(self.url + "/Subtext/user/{}".format(user_id), params={
 			'sessionId': session_id
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
 				raise APIError(resp.text, resp.status_code)
 		return resp.json()
-		
+	
+	def get_friends(self, session_id: UUID, user_id: UUID):
+		resp = requests.get(self.url + "/Subtext/user/{}/friends".format(user_id), params={
+			'sessionId': session_id
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
+	def get_blocked(self, session_id: UUID, user_id: UUID):
+		resp = requests.get(self.url + "/Subtext/user/{}/blocked".format(user_id), params={
+			'sessionId': session_id
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
+	def get_friend_requests(self, session_id: UUID, user_id: UUID):
+		resp = requests.get(self.url + "/Subtext/user/{}/friendrequests".format(user_id), params={
+			'sessionId': session_id
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()

@@ -25,7 +25,7 @@ class AdminAPI:
 		resp = requests.get(self.url + "/Subtext/admin/login/challenge", params={
 			'adminId': admin_id
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -40,7 +40,7 @@ class AdminAPI:
 			'adminId': admin_id,
 			'response': base64.b64encode(response)
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -66,7 +66,7 @@ class AdminAPI:
 		resp = requests.post(self.url + "/Subtext/admin/renew", params={
 			'sessionId': session_id
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
@@ -80,7 +80,7 @@ class AdminAPI:
 		resp = requests.post(self.url + "/Subtext/admin/logout", params={
 			'sessionId': session_id
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			print(resp.headers)
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
@@ -101,7 +101,7 @@ class AdminAPI:
 			'startTime': start_time,
 			'endTime': end_time
 		})
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:

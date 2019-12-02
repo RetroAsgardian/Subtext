@@ -37,7 +37,7 @@ class Subtext:
 		Retrieve server information.
 		"""
 		resp = requests.get(self.url + "/Subtext")
-		if resp.status_code != 200:
+		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'] == 'application/json':
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:

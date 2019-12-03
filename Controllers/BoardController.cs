@@ -9,27 +9,17 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace Subtext.Controllers {
-	[Serializable]
-	public enum SessionVerificationResult {
-		Success,
-		SessionNotFound,
-		UserNotFound,
-		SessionExpired,
-		UserLoggedOut,
-		OtherError
-	}
-	
 	[Produces("application/json")]
 	[Route("/Subtext/user")]
 	[ApiController]
-	public class UserController : ControllerBase {
+	public class BoardController : ControllerBase {
 		private readonly ChatContext context;
 		
 		static Regex reName = new Regex(@"^[a-z_][a-z0-9_]{4,}$", RegexOptions.Compiled);
 		
 		static RandomNumberGenerator rng = RandomNumberGenerator.Create();
 		
-		public UserController(ChatContext context) {
+		public BoardController(ChatContext context) {
 			this.context = context;
 		}
 		

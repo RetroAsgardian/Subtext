@@ -3,7 +3,7 @@
 subtext.admin - Subtext admin API.
 """
 from typing import Optional
-import requests, base64, requests, hashlib
+import requests, base64, hashlib
 from uuid import UUID
 from datetime import datetime
 

@@ -6,6 +6,8 @@ import requests
 
 from . import admin
 from . import user
+from . import key
+from . import board
 from .common import _assert_compatibility, VersionError, APIError, PagedList, Translator
 
 VERSION = "0.1.0"
@@ -31,6 +33,8 @@ class Subtext:
 		
 		self.admin = admin.AdminAPI(self.url, self.version, **self.config)
 		self.user = user.UserAPI(self.url, self.version, **self.config)
+		self.key = key.KeyAPI(self.url, self.version, **self.config)
+		self.board = board.BoardAPI(self.url, self.version, **self.config)
 	
 	def about(self):
 		"""

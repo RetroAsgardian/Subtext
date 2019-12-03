@@ -3,7 +3,7 @@
 subtext.user - Subtext user API.
 """
 from typing import Optional
-import requests, base64, requests, hashlib
+import requests, base64, hashlib
 from uuid import UUID
 from datetime import datetime
 
@@ -129,15 +129,6 @@ class UserAPI:
 			else:
 				raise APIError(resp.text, resp.status_code)
 		return resp.json()
-	
-	def get_user_key(self, key_id: UUID):
-		resp = requests.get(self.url + "/Subtext/keys/{}".format(key_id))
-		if resp.status_code // 100 != 2:
-			if resp.headers['Content-Type'].startswith('application/json'):
-				raise APIError(resp.json()['error'], resp.status_code)
-			else:
-				raise APIError(resp.text, resp.status_code)
-		return resp.content
 	
 	def post_user_key(self, session_id: UUID, user_id: UUID, public_key: bytes):
 		resp = requests.post(self.url + "/Subtext/user/{}/keys".format(user_id), data=public_key, params={

@@ -9,13 +9,12 @@ This repository contains the server code for Subtext.
 - .NET Core 3.0
 - Microsoft SQL Server 2017 (For now...)
 - A computer
-- Some nice, hot ***moist caffeine***
 - That's it
 
 ## Installing
-- We have a shell script
-- Actually we don't
-- But we'll add one later
+1. Go to walmart
+2. *Buy Almond*
+3. Congrations
 
 ## Forking Etiquette
 If you create a fork, please change `variant` in `Program.cs` to your repository name. This helps us understand and solve bug reports involving unofficial server variants, and informs users about the code running on each instance.

@@ -299,9 +299,8 @@ namespace Subtext.Controllers {
 				return StatusCode(401, new APIError("AuthError"));
 			}
 			
-			User user = await context.Users.FindAsync(userId);
-			if (user == null) {
-				return StatusCode(404, new APIError("NoObjectWithId"));
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			
 			if (start.HasValue && start < 0) {
@@ -313,7 +312,7 @@ namespace Subtext.Controllers {
 			}
 			
 			return StatusCode(200, await context.FriendRecords
-				.Where(fr => fr.OwnerId == user.Id)
+				.Where(fr => fr.OwnerId == userId)
 				.OrderBy(fr => fr.FriendId)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
@@ -346,9 +345,8 @@ namespace Subtext.Controllers {
 				return StatusCode(401, new APIError("AuthError"));
 			}
 			
-			User user = await context.Users.FindAsync(userId);
-			if (user == null) {
-				return StatusCode(404, new APIError("NoObjectWithId"));
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			
 			if (start.HasValue && start < 0) {
@@ -360,7 +358,7 @@ namespace Subtext.Controllers {
 			}
 			
 			return StatusCode(200, await context.BlockRecords
-				.Where(br => br.OwnerId == user.Id)
+				.Where(br => br.OwnerId == userId)
 				.OrderBy(br => br.BlockedId)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
@@ -393,9 +391,8 @@ namespace Subtext.Controllers {
 				return StatusCode(401, new APIError("AuthError"));
 			}
 			
-			User user = await context.Users.FindAsync(userId);
-			if (user == null) {
-				return StatusCode(404, new APIError("NoObjectWithId"));
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			
 			if (start.HasValue && start < 0) {
@@ -407,7 +404,7 @@ namespace Subtext.Controllers {
 			}
 			
 			return StatusCode(200, await context.FriendRequests
-				.Where(fr => fr.RecipientId == user.Id)
+				.Where(fr => fr.RecipientId == userId)
 				.OrderBy(fr => fr.SenderId)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
@@ -454,7 +451,7 @@ namespace Subtext.Controllers {
 			}
 			
 			return StatusCode(200, await context.PublicKeys
-				.Where(pk => pk.OwnerId == user.Id)
+				.Where(pk => pk.OwnerId == userId)
 				.OrderByDescending(pk => pk.PublishTime)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))

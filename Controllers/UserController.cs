@@ -94,7 +94,7 @@ namespace Subtext.Controllers {
 		public async Task<ActionResult> QueryIdByName(
 			string name
 		) {
-			if (!(await context.Users.AnyAsync(u => u.Name == name))) {
+			if (!await context.Users.AnyAsync(u => u.Name == name)) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			

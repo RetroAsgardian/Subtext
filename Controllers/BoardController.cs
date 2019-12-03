@@ -61,6 +61,13 @@ namespace Subtext.Controllers {
 			board.Encryption = encryption;
 			
 			await context.Boards.AddAsync(board);
+			
+			MemberRecord mr = new MemberRecord();
+			mr.Board = board;
+			mr.User = session.User;
+			
+			await context.MemberRecords.AddAsync(mr);
+			
 			await context.SaveChangesAsync();
 			
 			return StatusCode(201, board.Id);
@@ -93,9 +100,8 @@ namespace Subtext.Controllers {
 			if (board == null) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
-			await context.Entry(board).Collection(b => b.Members).LoadAsync();
 			
-			if (session.UserId != board.OwnerId && !board.Members.Any(mr => mr.UserId == session.UserId)) {
+			if (!await context.MemberRecords.AnyAsync(mr => mr.User == session.User && mr.Board == board)) {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			

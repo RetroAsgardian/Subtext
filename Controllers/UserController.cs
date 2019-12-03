@@ -271,7 +271,11 @@ namespace Subtext.Controllers {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
-			return StatusCode(200, new {user.Id, user.Name, user.Presence, user.LastActive, user.Status, user.IsLocked, user.LockReason, user.LockExpiry, user.IsDeleted});
+			if (await context.FriendRecords.AnyAsync(fr => fr.Owner == session.User && fr.Friend == user)) {
+				return StatusCode(200, new {user.Id, user.Name, user.Presence, user.LastActive, user.Status, user.IsLocked, user.LockReason, user.LockExpiry, user.IsDeleted});
+			} else {
+				return StatusCode(200, new {user.Id, user.Name, user.IsDeleted});
+			}
 		}
 		
 		[HttpGet("{userId}/friends")]

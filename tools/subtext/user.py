@@ -18,7 +18,7 @@ class UserAPI:
 		self.version = version
 		self.config = config
 	
-	def create(self, name: str, password: str, public_key: bytes = bytes(0)):
+	def create_user(self, name: str, password: str, public_key: bytes = bytes(0)):
 		resp = requests.post(self.url + "/Subtext/user/create", data=public_key, params={
 			'name': name,
 			'password': password

@@ -24,7 +24,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("create")]
-		public async Task<ActionResult> Create(
+		public async Task<ActionResult> CreateBoard(
 			Guid sessionId,
 			string name,
 			BoardEncryption encryption = BoardEncryption.GnuPG

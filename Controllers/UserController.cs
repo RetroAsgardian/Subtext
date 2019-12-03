@@ -34,7 +34,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("create")]
-		public async Task<ActionResult> Create(
+		public async Task<ActionResult> CreateUser(
 			string name,
 			string password,
 			[FromBody] byte[] publicKey

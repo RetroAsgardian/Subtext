@@ -24,7 +24,7 @@ class BoardAPI:
 		self.version = version
 		self.config = config
 	
-	def create(self, session_id: UUID, name: str, encryption: BoardEncryption = BoardEncryption.gnupg):
+	def create_board(self, session_id: UUID, name: str, encryption: BoardEncryption = BoardEncryption.gnupg):
 		resp = requests.post(self.url + "/Subtext/board/create", params={
 			'sessionId': session_id,
 			'name': name,

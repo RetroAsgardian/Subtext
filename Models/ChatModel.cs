@@ -257,16 +257,12 @@ namespace Subtext.Models {
 	
 	public class ChatContext : DbContext {
 		
-		// static bool createdCheck = false;
+		private static bool migrated = false;
 		
 		public ChatContext(DbContextOptions<ChatContext> options) : base(options) {
-			/*
-			if (!createdCheck) {
-				Database.EnsureCreated();
-				// TODO migration???
-				createdCheck = true;
+			if (!migrated) {
+				Database.Migrate();
 			}
-			*/
 		}
 		
 		public DbSet<User> Users { get; set; }

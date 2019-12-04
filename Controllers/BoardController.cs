@@ -162,7 +162,7 @@ namespace Subtext.Controllers {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
-			if (!await context.MemberRecords.AnyAsync(mr => mr.User == session.User && mr.Board == board)) {
+			if (!await context.MemberRecords.AnyAsync(mr => mr.UserId == session.UserId && mr.Board == board)) {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			

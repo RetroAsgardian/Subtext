@@ -126,7 +126,8 @@ namespace Subtext.Models {
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; set; }
 		
-		// DM boards MUST be named "!direct_ID"
+		// DM boards MUST be named "!direct_RECIPIENTID"
+		// Where the recipient is the user that isn't the board owner
 		public string Name { get; set; }
 		
 		public bool IsDirect { get; set; }
@@ -260,7 +261,7 @@ namespace Subtext.Models {
 		private static bool migrated = false;
 		
 		public ChatContext(DbContextOptions<ChatContext> options) : base(options) {
-			// HACKHACK prevent migration when EF CLI tool hijacks ChatModel
+			// HACK prevent migration when EF CLI tool hijacks ChatModel
 			if (!Program.MainCalled) {
 				return;
 			}

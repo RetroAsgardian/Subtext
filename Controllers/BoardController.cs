@@ -100,20 +100,34 @@ namespace Subtext.Controllers {
 				return StatusCode(403, new APIError("NotFriends"));
 			}
 			
+			// TODO better way to find DM boards, not reliant on the name
+			string name1 = "!direct_" + recipientId;
+			string name2 = "!direct_" + session.UserId;
+			IQueryable<Board> dmBoards = context.Boards.Where(b => b.IsDirect == true && (
+				(b.OwnerId == session.UserId && b.Name == name1) ||
+				(b.OwnerId == recipientId && b.Name == name2)
+			));
+			if (await dmBoards.AnyAsync()) {
+				return StatusCode(200, (await dmBoards.FirstAsync()).Id);
+			}
+			
 			Board board = new Board();
+			board.IsDirect = true;
 			board.Owner = session.User;
-			board.Name = "!temp_"+ Guid.NewGuid().ToString();
+			board.Name = "!direct_" + recipientId;
 			board.Encryption = BoardEncryption.GnuPG;
 			
 			await context.Boards.AddAsync(board);
 			
-			board.Name = "!direct_"+board.Id.ToString();
+			MemberRecord mr1 = new MemberRecord();
+			mr1.Board = board;
+			mr1.User = session.User;
+			MemberRecord mr2 = new MemberRecord();
+			mr2.Board = board;
+			mr2.UserId = recipientId;
 			
-			MemberRecord mr = new MemberRecord();
-			mr.Board = board;
-			mr.User = session.User;
-			
-			await context.MemberRecords.AddAsync(mr);
+			await context.MemberRecords.AddAsync(mr1);
+			await context.MemberRecords.AddAsync(mr2);
 			
 			await context.SaveChangesAsync();
 			

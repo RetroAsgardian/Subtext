@@ -15,7 +15,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{keyId}")]
-		[Produces("application/octet-stream", "application/json")]
+		[Produces("application/octet-stream")]
 		public async Task<ActionResult> GetKeyData(
 			Guid keyId
 		) {

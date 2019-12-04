@@ -73,6 +73,48 @@ namespace Subtext.Controllers {
 			return StatusCode(201, board.Id);
 		}
 		
+		[HttpPost("createdirect")]
+		public async Task<ActionResult> CreateBoardDirect(
+			Guid sessionId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await new UserController(context).VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			Board board = new Board();
+			board.Owner = session.User;
+			board.Name = "!temp_"+ Guid.NewGuid().ToString();
+			board.Encryption = BoardEncryption.GnuPG;
+			
+			await context.Boards.AddAsync(board);
+			
+			board.Name = "!direct_"+board.Id.ToString();
+			
+			MemberRecord mr = new MemberRecord();
+			mr.Board = board;
+			mr.User = session.User;
+			
+			await context.MemberRecords.AddAsync(mr);
+			
+			await context.SaveChangesAsync();
+			
+			return StatusCode(201, board.Id);
+		}
+		
 		[HttpGet("{boardId}")]
 		public async Task<ActionResult> GetBoard(
 			Guid sessionId,

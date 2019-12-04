@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace Subtext.Models {
 	[Serializable]
@@ -111,6 +112,7 @@ namespace Subtext.Models {
 		public DateTime PublishTime { get; set; }
 	}
 	
+	[JsonConverter(typeof(JsonStringEnumConverter))]
 	[Serializable]
 	public enum BoardEncryption {
 		None,

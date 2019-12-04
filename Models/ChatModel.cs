@@ -129,6 +129,8 @@ namespace Subtext.Models {
 		// DM boards MUST be named "!direct_ID"
 		public string Name { get; set; }
 		
+		public bool IsDirect { get; set; }
+		
 		public DateTime LastUpdate { get; set; }
 		public DateTime LastSignificantUpdate { get; set; }
 		
@@ -255,14 +257,16 @@ namespace Subtext.Models {
 	
 	public class ChatContext : DbContext {
 		
-		static bool createdCheck = false;
+		// static bool createdCheck = false;
 		
 		public ChatContext(DbContextOptions<ChatContext> options) : base(options) {
+			/*
 			if (!createdCheck) {
 				Database.EnsureCreated();
 				// TODO migration???
 				createdCheck = true;
 			}
+			*/
 		}
 		
 		public DbSet<User> Users { get; set; }

@@ -75,7 +75,8 @@ namespace Subtext.Controllers {
 		
 		[HttpPost("createdirect")]
 		public async Task<ActionResult> CreateBoardDirect(
-			Guid sessionId
+			Guid sessionId,
+			Guid recipientId
 		) {
 			(SessionVerificationResult verificationResult, Session session) = await new UserController(context).VerifyAndRenewSession(sessionId);
 			
@@ -93,6 +94,10 @@ namespace Subtext.Controllers {
 				
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (!await context.FriendRecords.AnyAsync(fr => fr.OwnerId == session.UserId && fr.FriendId == recipientId)) {
+				return StatusCode(403, new APIError("NotFriends"));
 			}
 			
 			Board board = new Board();

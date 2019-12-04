@@ -260,8 +260,13 @@ namespace Subtext.Models {
 		private static bool migrated = false;
 		
 		public ChatContext(DbContextOptions<ChatContext> options) : base(options) {
+			// HACKHACK prevent migration when EF CLI tool hijacks ChatModel
+			if (!Program.MainCalled) {
+				return;
+			}
 			if (!migrated) {
 				Database.Migrate();
+				migrated = true;
 			}
 		}
 		

@@ -12,7 +12,12 @@ namespace Subtext {
 		public static readonly string version = "0.1.0";
 		public static readonly string variant = "RetroAsgardian/Subtext";
 		
+		// HACKHACK prevent migration when EF CLI tool hijacks ChatModel
+		public static bool MainCalled { get; private set; }
+		
 		public static void Main(string[] args) {
+			MainCalled = true;
+			
 			Config.Init();
 			CreateHostBuilder(args).Build().Run();
 		}

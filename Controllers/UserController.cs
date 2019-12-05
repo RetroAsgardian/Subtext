@@ -266,6 +266,10 @@ namespace Subtext.Controllers {
 				return StatusCode(401, new APIError("AuthError"));
 			}
 			
+			if (userId == Guid.Empty) {
+				userId = (Guid) session.UserId;
+			}
+			
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
@@ -301,6 +305,10 @@ namespace Subtext.Controllers {
 				
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId == Guid.Empty) {
+				userId = (Guid) session.UserId;
 			}
 			
 			if (userId != session.UserId) {
@@ -349,6 +357,10 @@ namespace Subtext.Controllers {
 				return StatusCode(401, new APIError("AuthError"));
 			}
 			
+			if (userId == Guid.Empty) {
+				userId = (Guid) session.UserId;
+			}
+			
 			if (userId != session.UserId) {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
@@ -393,6 +405,10 @@ namespace Subtext.Controllers {
 				
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId == Guid.Empty) {
+				userId = (Guid) session.UserId;
 			}
 			
 			if (userId != session.UserId) {
@@ -441,6 +457,10 @@ namespace Subtext.Controllers {
 				return StatusCode(401, new APIError("AuthError"));
 			}
 			
+			if (userId == Guid.Empty) {
+				userId = (Guid) session.UserId;
+			}
+			
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
@@ -485,6 +505,10 @@ namespace Subtext.Controllers {
 				
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId == Guid.Empty) {
+				userId = (Guid) session.UserId;
 			}
 			
 			if (userId != session.UserId) {

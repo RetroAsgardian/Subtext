@@ -502,5 +502,77 @@ namespace Subtext.Controllers {
 			return StatusCode(201, key.Id);
 		}
 		
+		[HttpDelete("{userId}")]
+		public async Task<ActionResult> DeleteUser(
+			Guid sessionId,
+			Guid userId,
+			string password
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			User user = session.User;
+			
+			bool passwordMatch = false;
+			
+			byte[] combinedSalt = new byte[Subtext.Config.secretSize + 1];
+			user.Salt.CopyTo(combinedSalt, 0);
+			
+			for (int pepper = 0; pepper < 256; pepper++) {
+				combinedSalt[combinedSalt.Length - 1] = (byte) pepper;
+				Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, combinedSalt, Subtext.Config.pbkdf2Iterations);
+				pbkdf2.Salt = combinedSalt;
+				byte[] secret = pbkdf2.GetBytes(Subtext.Config.secretSize);
+				if (secret.SequenceEqual(user.Secret)) {
+					passwordMatch = true;
+					break;
+				}
+			}
+			
+			if (!passwordMatch) {
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			// Mark as deleted
+			user.IsDeleted = true;
+			
+			// Delete secret and presence data
+			user.Salt = null;
+			user.Secret = null;
+			user.Name = user.Name + "!deleted_" + DateTime.UtcNow.ToString("yyyyMMdd");
+			user.LastActive = DateTime.MinValue;
+			user.Presence = UserPresence.Offline;
+			user.Status = "";
+			
+			// Close sessions
+			await context.Sessions.Where(s => s.UserId == user.Id).ForEachAsync(s => {
+				context.Sessions.Remove(s);
+			});
+			
+			await context.SaveChangesAsync();
+			
+			return StatusCode(200, "success");
+		}
+		
 	}
 }

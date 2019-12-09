@@ -134,6 +134,51 @@ namespace Subtext.Controllers {
 			return StatusCode(201, board.Id);
 		}
 		
+		[HttpGet("")]
+		public async Task<ActionResult> GetBoards(
+			Guid sessionId,
+			int? start = null,
+			int? count = null,
+			bool? onlyOwned = null
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await new UserController(context).VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (onlyOwned.HasValue && onlyOwned.Value) {
+				return StatusCode(200, await context.Boards
+					.Where(b => b.OwnerId == session.UserId)
+					.OrderBy(b => b.Id)
+					.Skip(start.GetValueOrDefault(0))
+					.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate})
+					.ToListAsync());
+			} else {
+				return StatusCode(200, await context.MemberRecords
+					.Where(mr => mr.UserId == session.UserId)
+					.Join(context.Boards, mr => mr.BoardId, b => b.Id, (mr, b) => b)
+					.OrderBy(b => b.Id)
+					.Skip(start.GetValueOrDefault(0))
+					.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate})
+					.ToListAsync());
+			}
+		}
+		
 		[HttpGet("{boardId}")]
 		public async Task<ActionResult> GetBoard(
 			Guid sessionId,

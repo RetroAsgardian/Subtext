@@ -7,7 +7,7 @@ namespace Subtext {
 		public string Error { get { return this.error; } }
 		
 		public APIError(string error) {
-			Console.WriteLine("APIError initialized");
+			// Console.WriteLine("APIError initialized");
 			this.error = error;
 		}
 	}

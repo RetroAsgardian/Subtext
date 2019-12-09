@@ -18,8 +18,8 @@ class KeyAPI:
 		self.version = version
 		self.config = config
 	
-	def get_user_key(self, key_id: UUID):
-		resp = requests.get(self.url + "/Subtext/keys/{}".format(key_id))
+	def get_key_data(self, key_id: UUID):
+		resp = requests.get(self.url + "/Subtext/key/{}".format(key_id))
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
 				raise APIError(resp.json()['error'], resp.status_code)

@@ -34,8 +34,8 @@ namespace Subtext {
 			});
 			
 			services.AddMvc((MvcOptions opt) => {
-				opt.InputFormatters.Add(new Subtext.Formatters.BinaryInputFormatter());
-				opt.OutputFormatters.Add(new Subtext.Formatters.BinaryOutputFormatter());
+				opt.InputFormatters.Insert(0, new Subtext.Formatters.BinaryInputFormatter());
+				opt.OutputFormatters.Insert(0, new Subtext.Formatters.BinaryOutputFormatter());
 			});
 			
 			services.AddControllers();

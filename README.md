@@ -12,9 +12,18 @@ This repository contains the server code for Subtext.
 - That's it
 
 ## Installing
-1. Go to walmart
-2. *Buy Almond*
-3. Congrations
+(We'll make an installer script later.)
+
+- Install .NET Core
+- Install Microsoft SQL Server 2017
+- Create the database and user
+- Clone this repository
+- Edit `Config.cs`
+- Create `db.creds` file
+- `dotnet restore` or whatever
+- `dotnet ef database update`
+- Write a systemd unit file or something
+- Congrations
 
 ## Forking Etiquette
 If you create a fork, please change `variant` in `Program.cs` to your repository name. This helps us understand and solve bug reports involving unofficial server variants, and informs users about the code running on each instance.

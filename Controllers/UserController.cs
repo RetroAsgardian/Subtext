@@ -416,6 +416,97 @@ namespace Subtext.Controllers {
 				.ToListAsync());
 		}
 		
+		[HttpPost("{userId}/friendrequests")]
+		public async Task<ActionResult> SendFriendRequest(
+			Guid sessionId,
+			Guid userId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			User user = await context.Users.FindAsync(userId);
+			if (user == null) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			if (await context.FriendRecords.AnyAsync(fr => fr.OwnerId == session.UserId && fr.FriendId == userId)) {
+				return StatusCode(409, new APIError("AlreadyFriends"));
+			}
+			if (await context.FriendRequests.AnyAsync(fr => fr.SenderId == session.UserId && fr.RecipientId == userId)) {
+				return StatusCode(409, new APIError("AlreadySent"));
+			}
+			
+			FriendRequest request = new FriendRequest();
+			request.Sender = session.User;
+			request.Recipient = user;
+			
+			await context.FriendRequests.AddAsync(request);
+			await context.SaveChangesAsync();
+			
+			return StatusCode(201, "success");
+		}
+		
+		[HttpPost("{userId}/friendrequests/{senderId}")]
+		public async Task<ActionResult> AcceptFriendRequest(
+			Guid sessionId,
+			Guid userId,
+			Guid senderId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			if (!await context.FriendRequests.AnyAsync(fr => fr.SenderId == senderId && fr.RecipientId == userId)) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			FriendRequest request = await context.FriendRequests.FirstAsync(fr => fr.SenderId == senderId && fr.RecipientId == userId);
+			await context.Entry(request).Reference(fr => fr.Sender).LoadAsync();
+			
+			FriendRecord friend = new FriendRecord();
+			friend.Owner = session.User;
+			friend.Friend = request.Sender;
+			
+			await context.FriendRecords.AddAsync(friend);
+			context.FriendRequests.Remove(request);
+			await context.SaveChangesAsync();
+			
+			return StatusCode(200, "success");
+		}
+		
 		[HttpGet("{userId}/keys")]
 		public async Task<ActionResult> GetUserKeys(
 			Guid sessionId,

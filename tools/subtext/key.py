@@ -2,10 +2,8 @@
 """
 subtext.key - Subtext key API.
 """
-from typing import Optional
-import requests, base64, hashlib
+import requests
 from uuid import UUID
-from datetime import datetime
 
 from .common import _assert_compatibility, VersionError, APIError, PagedList
 

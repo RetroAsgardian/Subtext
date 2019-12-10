@@ -3,9 +3,8 @@
 subtext.user - Subtext user API.
 """
 from typing import Optional
-import requests, base64, hashlib
+import requests
 from uuid import UUID
-from datetime import datetime
 
 from .common import _assert_compatibility, VersionError, APIError, PagedList
 
@@ -86,9 +85,11 @@ class UserAPI:
 				raise APIError(resp.text, resp.status_code)
 		return resp.json()
 	
-	def get_friends(self, session_id: UUID, user_id: UUID):
+	def get_friends(self, session_id: UUID, user_id: UUID, start: Optional[int] = None, count: Optional[int] = None):
 		resp = requests.get(self.url + "/Subtext/user/{}/friends".format(user_id), params={
-			'sessionId': session_id
+			'sessionId': session_id,
+			'start': start,
+			'count': count
 		})
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
@@ -97,9 +98,11 @@ class UserAPI:
 				raise APIError(resp.text, resp.status_code)
 		return resp.json()
 	
-	def get_blocked(self, session_id: UUID, user_id: UUID):
+	def get_blocked(self, session_id: UUID, user_id: UUID, start: Optional[int] = None, count: Optional[int] = None):
 		resp = requests.get(self.url + "/Subtext/user/{}/blocked".format(user_id), params={
-			'sessionId': session_id
+			'sessionId': session_id,
+			'start': start,
+			'count': count
 		})
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
@@ -108,9 +111,11 @@ class UserAPI:
 				raise APIError(resp.text, resp.status_code)
 		return resp.json()
 	
-	def get_friend_requests(self, session_id: UUID, user_id: UUID):
+	def get_friend_requests(self, session_id: UUID, user_id: UUID, start: Optional[int] = None, count: Optional[int] = None):
 		resp = requests.get(self.url + "/Subtext/user/{}/friendrequests".format(user_id), params={
-			'sessionId': session_id
+			'sessionId': session_id,
+			'start': start,
+			'count': count
 		})
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):
@@ -119,9 +124,11 @@ class UserAPI:
 				raise APIError(resp.text, resp.status_code)
 		return resp.json()
 	
-	def get_user_keys(self, session_id: UUID, user_id: UUID):
+	def get_user_keys(self, session_id: UUID, user_id: UUID, start: Optional[int] = None, count: Optional[int] = None):
 		resp = requests.get(self.url + "/Subtext/user/{}/keys".format(user_id), params={
-			'sessionId': session_id
+			'sessionId': session_id,
+			'start': start,
+			'count': count
 		})
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):

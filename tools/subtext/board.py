@@ -37,9 +37,61 @@ class BoardAPI:
 				raise APIError(resp.text, resp.status_code)
 		return resp.json()
 	
+	def create_board_direct(self, session_id: UUID, recipient_id: UUID):
+		resp = requests.post(self.url + "/Subtext/board/createdirect", params={
+			'sessionId': session_id,
+			'recipientId': recipient_id
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
+	def get_boards(self, session_id: UUID, start: Optional[int] = None, count: Optional[int] = None, only_owned: Optional[bool] = None):
+		resp = requests.get(self.url + "/Subtext/board", params={
+			'sessionId': session_id,
+			'start': start,
+			'count': count,
+			'onlyOwned': only_owned
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
 	def get_board(self, session_id: UUID, board_id: UUID):
 		resp = requests.get(self.url + "/Subtext/board/{}".format(board_id), params={
 			'sessionId': session_id
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
+	def get_board_members(self, session_id: UUID, board_id: UUID, start: Optional[int] = None, count: Optional[int] = None):
+		resp = requests.get(self.url + "/Subtext/board/{}/members".format(board_id), params={
+			'sessionId': session_id,
+			'start': start,
+			'count': count
+		})
+		if resp.status_code // 100 != 2:
+			if resp.headers['Content-Type'].startswith('application/json'):
+				raise APIError(resp.json()['error'], resp.status_code)
+			else:
+				raise APIError(resp.text, resp.status_code)
+		return resp.json()
+	
+	def get_board_messages(self, session_id: UUID, board_id: UUID, start: Optional[int] = None, count: Optional[int] = None):
+		resp = requests.get(self.url + "/Subtext/board/{}/messages".format(board_id), params={
+			'sessionId': session_id,
+			'start': start,
+			'count': count
 		})
 		if resp.status_code // 100 != 2:
 			if resp.headers['Content-Type'].startswith('application/json'):

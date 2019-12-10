@@ -244,7 +244,7 @@ namespace Subtext.Controllers {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
-			if (!await context.MemberRecords.AnyAsync(mr => mr.UserId == session.UserId && mr.BoardId == board.Id)) {
+			if (!await context.MemberRecords.AnyAsync(mr => mr.UserId == session.UserId && mr.BoardId == boardId)) {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			

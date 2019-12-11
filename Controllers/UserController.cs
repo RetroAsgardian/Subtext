@@ -244,7 +244,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{userId}")]
-		public async Task<ActionResult> GetUser(
+		public async Task<ActionResult> Get(
 			Guid sessionId,
 			Guid userId
 		) {
@@ -279,7 +279,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{userId}/friends")]
-		public async Task<ActionResult> GetUserFriends(
+		public async Task<ActionResult> GetFriends(
 			Guid sessionId,
 			Guid userId,
 			int? start = null,
@@ -324,8 +324,39 @@ namespace Subtext.Controllers {
 				.ToListAsync());
 		}
 		
+		[HttpDelete("{userId}/friends/{friendId}")]
+		public async Task<ActionResult> RemoveFriend(
+			Guid sessionId,
+			Guid userId,
+			Guid friendId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			return StatusCode(501, new APIError("NotImplemented"));
+		}
+		
 		[HttpGet("{userId}/blocked")]
-		public async Task<ActionResult> GetUserBlocked(
+		public async Task<ActionResult> GetBlocked(
 			Guid sessionId,
 			Guid userId,
 			int? start = null,
@@ -371,7 +402,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{userId}/friendrequests")]
-		public async Task<ActionResult> GetUserFriendRequests(
+		public async Task<ActionResult> GetFriendRequests(
 			Guid sessionId,
 			Guid userId,
 			int? start = null,
@@ -496,19 +527,64 @@ namespace Subtext.Controllers {
 			FriendRequest request = await context.FriendRequests.FirstAsync(fr => fr.SenderId == senderId && fr.RecipientId == userId);
 			await context.Entry(request).Reference(fr => fr.Sender).LoadAsync();
 			
-			FriendRecord friend = new FriendRecord();
-			friend.Owner = session.User;
-			friend.Friend = request.Sender;
+			FriendRecord fr1 = new FriendRecord();
+			fr1.Owner = session.User;
+			fr1.Friend = request.Sender;
 			
-			await context.FriendRecords.AddAsync(friend);
+			FriendRecord fr2 = new FriendRecord();
+			fr2.Owner = request.Sender;
+			fr2.Friend = session.User;
+			
+			await context.FriendRecords.AddAsync(fr1);
+			await context.FriendRecords.AddAsync(fr2);
 			context.FriendRequests.Remove(request);
 			await context.SaveChangesAsync();
 			
 			return StatusCode(200, "success");
 		}
 		
+		[HttpDelete("{userId}/friendrequests/{senderId}")]
+		public async Task<ActionResult> RejectFriendRequest(
+			Guid sessionId,
+			Guid userId,
+			Guid senderId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			if (!await context.FriendRequests.AnyAsync(fr => fr.SenderId == senderId && fr.RecipientId == userId)) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			FriendRequest request = await context.FriendRequests.FirstAsync(fr => fr.SenderId == senderId && fr.RecipientId == userId);
+			context.FriendRequests.Remove(request);
+			
+			await context.SaveChangesAsync();
+			
+			return StatusCode(200, "success");
+		}
+		
 		[HttpGet("{userId}/keys")]
-		public async Task<ActionResult> GetUserKeys(
+		public async Task<ActionResult> GetKeys(
 			Guid sessionId,
 			Guid userId,
 			int? start = null,
@@ -555,7 +631,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("{userId}/keys")]
-		public async Task<ActionResult> PostUserKey(
+		public async Task<ActionResult> PostKey(
 			Guid sessionId,
 			Guid userId,
 			[FromBody] byte[] publicKey
@@ -594,7 +670,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpDelete("{userId}")]
-		public async Task<ActionResult> DeleteUser(
+		public async Task<ActionResult> Delete(
 			Guid sessionId,
 			Guid userId,
 			string password

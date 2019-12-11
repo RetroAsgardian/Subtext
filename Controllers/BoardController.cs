@@ -24,7 +24,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("create")]
-		public async Task<ActionResult> CreateBoard(
+		public async Task<ActionResult> Create(
 			Guid sessionId,
 			string name,
 			BoardEncryption encryption = BoardEncryption.GnuPG
@@ -74,7 +74,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("createdirect")]
-		public async Task<ActionResult> CreateBoardDirect(
+		public async Task<ActionResult> CreateDirect(
 			Guid sessionId,
 			Guid recipientId
 		) {
@@ -180,7 +180,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{boardId}")]
-		public async Task<ActionResult> GetBoard(
+		public async Task<ActionResult> Get(
 			Guid sessionId,
 			Guid boardId
 		) {
@@ -215,7 +215,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{boardId}/members")]
-		public async Task<ActionResult> GetBoardMembers(
+		public async Task<ActionResult> GetMembers(
 			Guid sessionId,
 			Guid boardId,
 			int? start = null,
@@ -258,7 +258,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpGet("{boardId}/messages")]
-		public async Task<ActionResult> GetBoardMessages(
+		public async Task<ActionResult> GetMessages(
 			Guid sessionId,
 			Guid boardId,
 			int? start = null,

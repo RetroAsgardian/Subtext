@@ -16,7 +16,7 @@ namespace Subtext.Controllers {
 		
 		[HttpGet("{keyId}")]
 		[Produces("application/octet-stream", "application/json")]
-		public async Task<ActionResult> GetKeyData(
+		public async Task<ActionResult> Get(
 			Guid keyId
 		) {
 			PublicKey key = await context.PublicKeys.FindAsync(keyId);

@@ -34,7 +34,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("create")]
-		public async Task<ActionResult> CreateUser(
+		public async Task<ActionResult> Create(
 			string name,
 			string password,
 			[FromBody] byte[] publicKey
@@ -142,6 +142,16 @@ namespace Subtext.Controllers {
 			}
 			
 			if (!passwordMatch) {
+				user.IncorrectGuesses += 1;
+				if (user.IncorrectGuesses >= Subtext.Config.passwordMaxAttempts) {
+					user.IncorrectGuesses = 0;
+					user.IsLocked = true;
+					// Log the IP address
+					user.LockReason = "TooManyPasswordAttempts " + Request.HttpContext.Connection.RemoteIpAddress.ToString();
+					user.LockExpiry = DateTime.UtcNow.Add(Subtext.Config.passwordLockTime);
+				}
+				await context.SaveChangesAsync();
+				
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, new APIError("AuthError"));
 			}
@@ -152,6 +162,7 @@ namespace Subtext.Controllers {
 			
 			user.LastActive = DateTime.UtcNow;
 			user.Presence = UserPresence.Online;
+			user.IncorrectGuesses = 0;
 			
 			await context.Sessions.AddAsync(session);
 			await context.SaveChangesAsync();

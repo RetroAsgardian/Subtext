@@ -23,6 +23,11 @@ namespace Subtext {
 		
 		public static int passwordMinLength = 8;
 		
+		// Number of incorrect password attempts to allow before locking the account.
+		public static int passwordMaxAttempts = 10;
+		
+		public static TimeSpan passwordLockTime = TimeSpan.FromHours(1);
+		
 		// Maximum amount of time an admin session can go without being renewed.
 		// This should be very short (1-5 minutes) for optimal security.
 		public static TimeSpan adminSessionDuration = TimeSpan.FromMinutes(2);

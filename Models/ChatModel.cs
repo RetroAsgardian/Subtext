@@ -37,6 +37,8 @@ namespace Subtext.Models {
 		public string LockReason { get; set; }
 		public DateTime LockExpiry { get; set; }
 		
+		public int IncorrectGuesses { get; set; }
+		
 		public bool IsDeleted { get; set; }
 		
 		[InverseProperty("Owner")]

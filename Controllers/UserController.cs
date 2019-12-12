@@ -746,7 +746,7 @@ namespace Subtext.Controllers {
 		}
 		
 		[HttpPost("{userId}/keys")]
-		public async Task<ActionResult> PostKey(
+		public async Task<ActionResult> AddKey(
 			Guid sessionId,
 			Guid userId,
 			[FromBody] byte[] publicKey

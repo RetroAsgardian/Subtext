@@ -473,6 +473,45 @@ namespace Subtext.Controllers {
 			return StatusCode(200, "success");
 		}
 		
+		[HttpDelete("{userId}/blocked/{blockedId}")]
+		public async Task<ActionResult> RemoveBlockedUser(
+			Guid sessionId,
+			Guid userId,
+			Guid blockedId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			if (!await context.BlockRecords.AnyAsync(br => br.OwnerId == userId && br.BlockedId == blockedId)) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			BlockRecord br = await context.BlockRecords.FirstAsync(br => br.OwnerId == userId && br.BlockedId == blockedId);
+			context.BlockRecords.Remove(br);
+			await context.SaveChangesAsync();
+			
+			return StatusCode(200, "success");
+		}
+		
 		[HttpGet("{userId}/friendrequests")]
 		public async Task<ActionResult> GetFriendRequests(
 			Guid sessionId,

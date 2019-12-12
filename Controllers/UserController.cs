@@ -454,6 +454,23 @@ namespace Subtext.Controllers {
 			if (userId != session.UserId) {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
+			
+			User blocked = await context.Users.FindAsync(blockedId);
+			if (blocked == null) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			if (await context.BlockRecords.AnyAsync(br => br.OwnerId == userId && br.BlockedId == blockedId)) {
+				return StatusCode(409, new APIError("AlreadyBlocked"));
+			}
+			
+			BlockRecord br = new BlockRecord();
+			br.Owner = session.User;
+			br.Blocked = blocked;
+			
+			await context.BlockRecords.AddAsync(br);
+			await context.SaveChangesAsync();
+			return StatusCode(200, "success");
 		}
 		
 		[HttpGet("{userId}/friendrequests")]

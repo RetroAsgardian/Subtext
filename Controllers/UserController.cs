@@ -459,6 +459,9 @@ namespace Subtext.Controllers {
 			if (blocked == null) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
+			if (blocked == session.User) {
+				return StatusCode(400, new APIError("InvalidRequest"));
+			}
 			
 			if (await context.BlockRecords.AnyAsync(br => br.OwnerId == userId && br.BlockedId == blockedId)) {
 				return StatusCode(409, new APIError("AlreadyBlocked"));
@@ -508,7 +511,6 @@ namespace Subtext.Controllers {
 			BlockRecord br = await context.BlockRecords.FirstAsync(br => br.OwnerId == userId && br.BlockedId == blockedId);
 			context.BlockRecords.Remove(br);
 			await context.SaveChangesAsync();
-			
 			return StatusCode(200, "success");
 		}
 		
@@ -584,6 +586,9 @@ namespace Subtext.Controllers {
 			User user = await context.Users.FindAsync(userId);
 			if (user == null) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			if (user == session.User) {
+				return StatusCode(400, new APIError("InvalidRequest"));
 			}
 			
 			if (await context.FriendRecords.AnyAsync(fr => fr.OwnerId == session.UserId && fr.FriendId == userId)) {

@@ -3,6 +3,8 @@ Subtext is an open-source, secure, private, decentralized alternative chat platf
 
 This repository contains the server code for Subtext.
 
+(This project is licensed under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.en.html), but I'm too lazy to add the LICENSE file right now.)
+
 (By the way, we have a [Discord](https://discord.gg/dt5bfHB).)
 
 ## Dependencies

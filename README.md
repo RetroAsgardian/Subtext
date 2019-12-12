@@ -19,6 +19,13 @@ This repository contains the server code for Subtext.
 - Install .NET Core
 - Install Microsoft SQL Server 2017
 - Create the database and user
+	- `CREATE DATABASE Subtext`
+	- `CREATE LOGIN username WITH PASSWORD='password'`
+	- `USE Subtext`
+	- `CREATE USER username FOR LOGIN username`
+	- `ALTER ROLE db_owner ADD MEMBER username`
+	- I hate MS SQL Server so much
+	- Also you'll need to `GO` after each of these or whatever because Transact-SQL
 - Clone this repository
 - Edit `Config.cs`
 - Create `db.creds` file

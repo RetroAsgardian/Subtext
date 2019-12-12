@@ -101,8 +101,8 @@ namespace Subtext.Controllers {
 			}
 			
 			// TODO better way to find DM boards, not reliant on the name
-			string name1 = "!direct_" + recipientId;
-			string name2 = "!direct_" + session.UserId;
+			string name1 = "!direct_" + recipientId + "_" + session.UserId;
+			string name2 = "!direct_" + session.UserId + "_" + recipientId;
 			IQueryable<Board> dmBoards = context.Boards.Where(b => b.IsDirect == true && (
 				(b.OwnerId == session.UserId && b.Name == name1) ||
 				(b.OwnerId == recipientId && b.Name == name2)
@@ -114,7 +114,7 @@ namespace Subtext.Controllers {
 			Board board = new Board();
 			board.IsDirect = true;
 			board.Owner = session.User;
-			board.Name = "!direct_" + recipientId;
+			board.Name = "!direct_" + recipientId + "_" + session.UserId;
 			board.Encryption = BoardEncryption.GnuPG;
 			
 			await context.Boards.AddAsync(board);

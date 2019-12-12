@@ -128,8 +128,8 @@ namespace Subtext.Models {
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Guid Id { get; set; }
 		
-		// DM boards MUST be named "!direct_RECIPIENTID"
-		// Where the recipient is the user that isn't the board owner
+		// DM boards MUST be named "!direct_RECIPIENTID_OWNERID"
+		// Where the recipient is the member that isn't the board owner
 		public string Name { get; set; }
 		
 		public bool IsDirect { get; set; }

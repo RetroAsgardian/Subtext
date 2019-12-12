@@ -692,7 +692,6 @@ namespace Subtext.Controllers {
 			
 			FriendRequest request = await context.FriendRequests.FirstAsync(fr => fr.SenderId == senderId && fr.RecipientId == userId);
 			context.FriendRequests.Remove(request);
-			
 			await context.SaveChangesAsync();
 			
 			return StatusCode(200, "success");
@@ -782,6 +781,53 @@ namespace Subtext.Controllers {
 			await context.SaveChangesAsync();
 			
 			return StatusCode(201, key.Id);
+		}
+		
+		[HttpPost("{userId}/presence")]
+		public async Task<ActionResult> SetPresence(
+			Guid sessionId,
+			Guid userId,
+			UserPresence presence
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			if (presence == UserPresence.Online) {
+				// "Away due to inactivity" crap is handled on the client because yes
+				session.User.Presence = UserPresence.Online;
+				await context.SaveChangesAsync();
+				return StatusCode(200, "success");
+			} else if (presence == UserPresence.Away) {
+				// TODO "Away until $TIME"
+				session.User.Presence = UserPresence.Away;
+				await context.SaveChangesAsync();
+				return StatusCode(200, "success");
+			} else if (presence == UserPresence.Busy) {
+				// TODO "Busy until $TIME"
+				session.User.Presence = UserPresence.Busy;
+				await context.SaveChangesAsync();
+				return StatusCode(200, "success");
+			} else {
+				return StatusCode(400, new APIError("InvalidRequest"));
+			}
 		}
 		
 		[HttpDelete("{userId}")]

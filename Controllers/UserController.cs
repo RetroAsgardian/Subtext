@@ -365,11 +365,24 @@ namespace Subtext.Controllers {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			
-			return StatusCode(501, new APIError("NotImplemented"));
+			if (!await context.FriendRecords.AnyAsync(fr => fr.OwnerId == userId && fr.FriendId == friendId)) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			FriendRecord fr1 = await context.FriendRecords.FirstAsync(fr => fr.OwnerId == userId && fr.FriendId == friendId);
+			context.FriendRecords.Remove(fr1);
+			
+			if (await context.FriendRecords.AnyAsync(fr => fr.OwnerId == friendId && fr.FriendId == userId)) {
+				FriendRecord fr2 = await context.FriendRecords.FirstAsync(fr => fr.OwnerId == userId && fr.FriendId == friendId);
+				context.FriendRecords.Remove(fr2);
+			}
+			
+			await context.SaveChangesAsync();
+			return StatusCode(200, "success");
 		}
 		
 		[HttpGet("{userId}/blocked")]
-		public async Task<ActionResult> GetBlocked(
+		public async Task<ActionResult> GetBlockedUsers(
 			Guid sessionId,
 			Guid userId,
 			int? start = null,
@@ -412,6 +425,35 @@ namespace Subtext.Controllers {
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
 				.Select(br => br.BlockedId)
 				.ToListAsync());
+		}
+		
+		[HttpPost("{userId}/blocked")]
+		public async Task<ActionResult> AddBlockedUser(
+			Guid sessionId,
+			Guid userId,
+			Guid blockedId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			if (userId != session.UserId) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
 		}
 		
 		[HttpGet("{userId}/friendrequests")]
@@ -575,7 +617,6 @@ namespace Subtext.Controllers {
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 					return StatusCode(401, new APIError("SessionExpired"));
 				}
-				
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, new APIError("AuthError"));
 			}

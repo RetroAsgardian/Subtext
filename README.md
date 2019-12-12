@@ -18,6 +18,9 @@ This repository contains the server code for Subtext.
 
 - Install .NET Core
 - Install Microsoft SQL Server 2017
+	- On bionic I'm pretty sure you need to do some library symlink fuckery
+	- But I don't remember exactly what that is
+	- Google it i guess
 - Create the database and user
 	- `CREATE DATABASE Subtext`
 	- `CREATE LOGIN username WITH PASSWORD='password'`

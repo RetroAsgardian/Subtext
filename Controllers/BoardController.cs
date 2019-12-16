@@ -25,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Subtext.Models;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace Subtext.Controllers {
 	[Produces("application/json")]
@@ -323,6 +324,19 @@ namespace Subtext.Controllers {
 			
 			await context.MemberRecords.AddAsync(mr);
 			
+			Message msg = new Message();
+			msg.Board = board;
+			msg.Author = session.User;
+			msg.Timestamp = DateTime.UtcNow;
+			msg.IsSystem = true;
+			msg.Type = "AddMember";
+			var msgData = new {
+				UserId = userId
+			};
+			msg.Content = JsonSerializer.SerializeToUtf8Bytes(msgData, msgData.GetType());
+			
+			await context.Messages.AddAsync(msg);
+			
 			await context.SaveChangesAsync();
 			return StatusCode(200, "success");
 		}
@@ -365,6 +379,19 @@ namespace Subtext.Controllers {
 			}
 			
 			context.MemberRecords.Remove(await context.MemberRecords.FirstAsync(mr => mr.UserId == userId && mr.Board == board));
+			
+			Message msg = new Message();
+			msg.Board = board;
+			msg.Author = session.User;
+			msg.Timestamp = DateTime.UtcNow;
+			msg.IsSystem = true;
+			msg.Type = "RemoveMember";
+			var msgData = new {
+				UserId = userId
+			};
+			msg.Content = JsonSerializer.SerializeToUtf8Bytes(msgData, msgData.GetType());
+			
+			await context.Messages.AddAsync(msg);
 			
 			await context.SaveChangesAsync();
 			return StatusCode(200, "success");
@@ -458,5 +485,12 @@ namespace Subtext.Controllers {
 			return StatusCode(200, message.Content);
 		}
 		
+		[HttpPost("{boardId}/messages")]
+		public async Task<ActionResult> PostMessage(
+			Guid sessionId,
+			Guid boardId
+		) {
+			
+		}
 	}
 }

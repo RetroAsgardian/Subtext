@@ -413,5 +413,50 @@ namespace Subtext.Controllers {
 				.ToListAsync());
 		}
 		
+		[HttpGet("{boardId}/messages/{messageId}")]
+		[Produces("application/octet-stream", "application/json")]
+		public async Task<ActionResult> GetMessage(
+			Guid sessionId,
+			Guid boardId,
+			Guid messageId
+		) {
+			(SessionVerificationResult verificationResult, Session session) = await new UserController(context).VerifyAndRenewSession(sessionId);
+			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			Board board = await context.Boards.FindAsync(boardId);
+			if (board == null) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			if (!await context.MemberRecords.AnyAsync(mr => mr.UserId == session.UserId && mr.BoardId == board.Id)) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			Message message = await context.Messages.FindAsync(messageId);
+			if (message == null) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			if (message.Board != board) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			return StatusCode(200, message.Content);
+		}
+		
 	}
 }

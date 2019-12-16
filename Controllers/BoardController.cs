@@ -326,7 +326,7 @@ namespace Subtext.Controllers {
 			
 			Message msg = new Message();
 			msg.Board = board;
-			msg.Author = session.User;
+			msg.Author = null;
 			msg.Timestamp = DateTime.UtcNow;
 			msg.IsSystem = true;
 			msg.Type = "AddMember";
@@ -336,6 +336,8 @@ namespace Subtext.Controllers {
 			msg.Content = JsonSerializer.SerializeToUtf8Bytes(msgData, msgData.GetType());
 			
 			await context.Messages.AddAsync(msg);
+			
+			board.LastUpdate = DateTime.UtcNow;
 			
 			await context.SaveChangesAsync();
 			return StatusCode(200, "success");
@@ -382,7 +384,7 @@ namespace Subtext.Controllers {
 			
 			Message msg = new Message();
 			msg.Board = board;
-			msg.Author = session.User;
+			msg.Author = null;
 			msg.Timestamp = DateTime.UtcNow;
 			msg.IsSystem = true;
 			msg.Type = "RemoveMember";
@@ -392,6 +394,8 @@ namespace Subtext.Controllers {
 			msg.Content = JsonSerializer.SerializeToUtf8Bytes(msgData, msgData.GetType());
 			
 			await context.Messages.AddAsync(msg);
+			
+			board.LastUpdate = DateTime.UtcNow;
 			
 			await context.SaveChangesAsync();
 			return StatusCode(200, "success");
@@ -474,23 +478,69 @@ namespace Subtext.Controllers {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			
-			Message message = await context.Messages.FindAsync(messageId);
-			if (message == null) {
+			Message msg = await context.Messages.FindAsync(messageId);
+			if (msg == null) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
-			if (message.Board != board) {
+			if (msg.Board != board) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
-			return StatusCode(200, message.Content);
+			return StatusCode(200, msg.Content);
 		}
 		
 		[HttpPost("{boardId}/messages")]
 		public async Task<ActionResult> PostMessage(
 			Guid sessionId,
-			Guid boardId
+			Guid boardId,
+			[FromBody] byte[] content,
+			bool isSystem = false,
+			string type = "Message"
 		) {
+			(SessionVerificationResult verificationResult, Session session) = await new UserController(context).VerifyAndRenewSession(sessionId);
 			
+			if (verificationResult != SessionVerificationResult.Success) {
+				if (verificationResult == SessionVerificationResult.SessionNotFound) {
+					return StatusCode(404, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.UserNotFound) {
+					return StatusCode(500, new APIError("NoObjectWithId"));
+				}
+				if (verificationResult == SessionVerificationResult.SessionExpired) {
+					Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+					return StatusCode(401, new APIError("SessionExpired"));
+				}
+				
+				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
+				return StatusCode(401, new APIError("AuthError"));
+			}
+			
+			Board board = await context.Boards.FindAsync(boardId);
+			if (board == null) {
+				return StatusCode(404, new APIError("NoObjectWithId"));
+			}
+			
+			if (!await context.MemberRecords.AnyAsync(mr => mr.UserId == session.UserId && mr.BoardId == board.Id)) {
+				return StatusCode(403, new APIError("NotAuthorized"));
+			}
+			
+			Message msg = new Message();
+			msg.Board = board;
+			msg.Author = session.User;
+			msg.Timestamp = DateTime.UtcNow;
+			msg.IsSystem = isSystem;
+			msg.Type = type;
+			msg.Content = content;
+			
+			await context.Messages.AddAsync(msg);
+			
+			board.LastUpdate = DateTime.UtcNow;
+			if (!isSystem) {
+				board.LastSignificantUpdate = DateTime.UtcNow;
+			}
+			
+			await context.SaveChangesAsync();
+			return StatusCode(201, msg.Id);
 		}
 	}
 }

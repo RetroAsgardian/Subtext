@@ -36,6 +36,13 @@ namespace Subtext {
 		public static void Main(string[] args) {
 			MainCalled = true;
 			
+			Console.WriteLine("Subtext - Copyright (C) 2019-2020 RetroAsgardian");
+			Console.WriteLine("This program comes with ABSOLUTELY NO WARRANTY.");
+			Console.WriteLine("This is free software, and you are welcome to redistribute it");
+			Console.WriteLine("under certain conditions.");
+			Console.WriteLine("For more details, see 'LICENSE.md'.");
+			Console.WriteLine();
+			
 			Config.Init();
 			CreateHostBuilder(args).Build().Run();
 		}

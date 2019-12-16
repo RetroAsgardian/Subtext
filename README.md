@@ -38,4 +38,4 @@ This repository contains the server code for Subtext.
 - Congrations
 
 ## Forking Etiquette
-If you create a fork/derivative of this software, please change `variant` in `Program.cs` to your repository name, or some other unique identifier. This helps us understand and solve bug reports involving unofficial server variants, and informs users about the code running on each instance.
+If you create a fork/derivative of this software, please change `variant` in `Program.cs` to your repository name. This helps us understand and solve bug reports involving unofficial server variants, and informs users about the code running on each instance.

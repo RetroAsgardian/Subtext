@@ -537,6 +537,7 @@ namespace Subtext.Controllers {
 			board.LastUpdate = DateTime.UtcNow;
 			if (!isSystem) {
 				board.LastSignificantUpdate = DateTime.UtcNow;
+				session.User.LastActive = DateTime.UtcNow;
 			}
 			
 			await context.SaveChangesAsync();

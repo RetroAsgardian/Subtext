@@ -65,17 +65,13 @@ namespace Subtext.Controllers {
 			Guid adminId,
 			[FromQuery] byte[] response
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			Admin admin = await context.Admins.FindAsync(adminId);
 			if (admin == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			if (admin.IsLoggedIn) {
-				result.Add("error", "AdminLoggedIn");
-				return StatusCode(403, result);
+				return StatusCode(403, new APIError("AdminLoggedIn"));
 			}
 			
 			Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(admin.Secret, admin.Challenge, Subtext.Config.pbkdf2Iterations);
@@ -97,11 +93,8 @@ namespace Subtext.Controllers {
 				
 				await context.SaveChangesAsync();
 				
-				result.Add("sessionId", session.Id);
-				
-				return StatusCode(200, result);
+				return StatusCode(200, session.Id);
 			} else {
-				result.Add("error", "IncorrectResponse");
 				await LogAdminAction(admin, "Login.Failure", "");
 				
 				byte[] challenge = new byte[Subtext.Config.secretSize];
@@ -112,7 +105,7 @@ namespace Subtext.Controllers {
 				
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-Admin");
 				
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("IncorrectResponse"));
 			}
 		}
 		
@@ -317,5 +310,6 @@ namespace Subtext.Controllers {
 			
 			return StatusCode(200, result);
 		}
+		
 	}
 }

@@ -180,58 +180,45 @@ namespace Subtext.Controllers {
 		public async Task<ActionResult> Renew(
 			Guid sessionId
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			(SessionVerificationResult verificationResult, AdminSession session) = await VerifyAdminSession(sessionId);
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(404, result);
+					return StatusCode(404, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(500, result);
+					return StatusCode(500, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserLoggedOut) {
-					result.Add("error", "AdminLoggedOut");
-					return StatusCode(403, result);
+					return StatusCode(403, new APIError("AdminLoggedOut"));
 				}
 				if (verificationResult == SessionVerificationResult.SessionExpired) {
-					result.Add("error", "SessionExpired");
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-Admin");
-					return StatusCode(401, result);
+					return StatusCode(401, new APIError("SessionExpired"));
 				}
 				
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-Admin");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
 			session.Timestamp = DateTime.UtcNow;
 			await context.SaveChangesAsync();
 			
-			result.Add("success", true);
-			
-			return StatusCode(200, result);
+			return StatusCode(200, "success");
 		}
 		
 		[HttpPost("logout")]
 		public async Task<ActionResult> Logout(
 			Guid sessionId
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			AdminSession session = await context.AdminSessions.FindAsync(sessionId);
 			if (session == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(404, result);
+				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
 			await context.Entry(session).Reference(s => s.Admin).LoadAsync();
 			Admin admin = session.Admin;
 			if (admin == null) {
-				result.Add("error", "NoObjectWithId");
-				return StatusCode(500, result);
+				return StatusCode(500, new APIError("NoObjectWithId"));
 			}
 			
 			admin.IsLoggedIn = false;
@@ -241,9 +228,7 @@ namespace Subtext.Controllers {
 			context.AdminSessions.Remove(session);
 			await context.SaveChangesAsync();
 			
-			result.Add("success", true);
-			
-			return StatusCode(200, result);
+			return StatusCode(200, "success");
 		}
 		
 		[HttpGet("auditlog")]
@@ -256,37 +241,29 @@ namespace Subtext.Controllers {
 			DateTime? startTime = null,
 			DateTime? endTime = null
 		) {
-			Dictionary<string, object> result = new Dictionary<string, object>();
-			
 			(SessionVerificationResult verificationResult, AdminSession session) = await VerifyAdminSession(sessionId);
 			if (verificationResult != SessionVerificationResult.Success) {
 				if (verificationResult == SessionVerificationResult.SessionNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(404, result);
+					return StatusCode(404, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserNotFound) {
-					result.Add("error", "NoObjectWithId");
-					return StatusCode(500, result);
+					return StatusCode(500, new APIError("NoObjectWithId"));
 				}
 				if (verificationResult == SessionVerificationResult.UserLoggedOut) {
-					result.Add("error", "AdminLoggedOut");
-					return StatusCode(403, result);
+					return StatusCode(403, new APIError("AdminLoggedOut"));
 				}
 				if (verificationResult == SessionVerificationResult.SessionExpired) {
-					result.Add("error", "SessionExpired");
 					Response.Headers.Add("WWW-Authenticate", "X-Subtext-Admin");
-					return StatusCode(401, result);
+					return StatusCode(401, new APIError("SessionExpired"));
 				}
 				
-				result.Add("error", "AuthError");
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-Admin");
-				return StatusCode(401, result);
+				return StatusCode(401, new APIError("AuthError"));
 			}
 			
 			bool authorized = await VerifyAdminPermissions(session.Admin, "AuditLog.View");
 			if (!authorized) {
-				result.Add("error", "NotAuthorized");
-				return StatusCode(403, result);
+				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			
 			if (start.HasValue && start < 0) {
@@ -297,7 +274,7 @@ namespace Subtext.Controllers {
 				count = Subtext.Config.pageSize;
 			}
 			
-			result.Add("log", await context.AuditLog
+			return StatusCode(200, await context.AuditLog
 				.OrderByDescending(ale => ale.Timestamp)
 				.Where(ale => action != null ? ale.Action == action : true)
 				.Where(ale => adminId.HasValue ? ale.AdminId == adminId : true)
@@ -307,8 +284,6 @@ namespace Subtext.Controllers {
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
 				.Select(ale => new {ale.Id, ale.AdminId, ale.Action, ale.Details, ale.Timestamp})
 				.ToListAsync());
-			
-			return StatusCode(200, result);
 		}
 		
 	}

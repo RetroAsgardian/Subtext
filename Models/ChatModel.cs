@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 
 namespace Subtext.Models {
+	[JsonConverter(typeof(JsonStringEnumConverter))]
 	[Serializable]
 	public enum UserPresence {
 		Offline,

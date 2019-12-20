@@ -801,7 +801,7 @@ namespace Subtext.Controllers {
 			return StatusCode(201, key.Id);
 		}
 		
-		[HttpPost("{userId}/presence")]
+		[HttpPut("{userId}/presence")]
 		public async Task<ActionResult> SetPresence(
 			Guid sessionId,
 			Guid userId,

@@ -145,5 +145,5 @@ class BoardAPI:
 				raise APIError(resp.json()['error'], resp.status_code)
 			else:
 				raise APIError(resp.text, resp.status_code)
-		return resp.content
+		return resp.json()
 	

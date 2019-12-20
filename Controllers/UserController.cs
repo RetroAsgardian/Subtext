@@ -805,7 +805,9 @@ namespace Subtext.Controllers {
 		public async Task<ActionResult> SetPresence(
 			Guid sessionId,
 			Guid userId,
-			UserPresence presence
+			UserPresence presence,
+			DateTime? untilTime = null,
+			string otherData = ""
 		) {
 			(SessionVerificationResult verificationResult, Session session) = await VerifyAndRenewSession(sessionId);
 			
@@ -831,16 +833,28 @@ namespace Subtext.Controllers {
 			if (presence == UserPresence.Online) {
 				// "Away due to inactivity" crap is handled on the client because yes
 				session.User.Presence = UserPresence.Online;
+				session.User.Status = otherData;
+				
 				await context.SaveChangesAsync();
 				return StatusCode(200, "success");
 			} else if (presence == UserPresence.Away) {
-				// TODO "Away until $TIME"
+				if (!untilTime.HasValue) {
+					return StatusCode(400, new APIError("InvalidRequest"));
+				}
+				
 				session.User.Presence = UserPresence.Away;
+				session.User.Status = untilTime.Value.ToString("O") + ";" + otherData;
+				
 				await context.SaveChangesAsync();
 				return StatusCode(200, "success");
 			} else if (presence == UserPresence.Busy) {
-				// TODO "Busy until $TIME"
+				if (!untilTime.HasValue) {
+					return StatusCode(400, new APIError("InvalidRequest"));
+				}
+				
 				session.User.Presence = UserPresence.Busy;
+				session.User.Status = untilTime.Value.ToString("O") + ";" + otherData;
+				
 				await context.SaveChangesAsync();
 				return StatusCode(200, "success");
 			} else {

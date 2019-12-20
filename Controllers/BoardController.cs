@@ -534,10 +534,10 @@ namespace Subtext.Controllers {
 			
 			await context.Messages.AddAsync(msg);
 			
-			board.LastUpdate = DateTime.UtcNow;
+			board.LastUpdate = msg.Timestamp;
 			if (!isSystem) {
-				board.LastSignificantUpdate = DateTime.UtcNow;
-				session.User.LastActive = DateTime.UtcNow;
+				board.LastSignificantUpdate = msg.Timestamp;
+				session.User.LastActive = msg.Timestamp;
 			}
 			
 			await context.SaveChangesAsync();

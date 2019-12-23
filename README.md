@@ -39,3 +39,11 @@ This repository contains the server code for Subtext.
 
 ## Forking Etiquette
 If you create a fork/derivative of this software, please change `variant` in `Program.cs` to your repository name. This helps us understand and solve bug reports involving unofficial server variants, and informs users about the code running on each instance.
+
+## Making a Client or Whatever Else
+Because Subtext uses end-to-end encryption, a significant portion of functionality is defined at the client level. To simplify development and ensure compatibility, we highly reccommend using an official client API:
+
+- [SubtextPy](https://github.com/RetroAsgardian/SubtextPy)
+- (more will be added later)
+
+If none of these libraries work for you, please check out the client documentation.

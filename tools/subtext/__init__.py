@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-subtext - Python library for the Subtext API
+python library for TESTING PURPOSES ONLY
 """
 import requests
 

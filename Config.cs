@@ -66,7 +66,7 @@ namespace Subtext {
 		public static int pageSize = 500;
 		
 		// If true, the server will redirect all HTTP requests to HTTPS
-		public static bool requireHttps = true;
+		public static bool requireHttps = false;
 		
 		// End of configuration options
 		

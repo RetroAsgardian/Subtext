@@ -389,7 +389,7 @@ namespace Subtext.Controllers {
 			context.FriendRecords.Remove(fr1);
 			
 			if (await context.FriendRecords.AnyAsync(fr => fr.OwnerId == friendId && fr.FriendId == userId)) {
-				FriendRecord fr2 = await context.FriendRecords.FirstAsync(fr => fr.OwnerId == userId && fr.FriendId == friendId);
+				FriendRecord fr2 = await context.FriendRecords.FirstAsync(fr => fr.OwnerId == friendId && fr.FriendId == userId);
 				context.FriendRecords.Remove(fr2);
 			}
 			

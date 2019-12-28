@@ -65,7 +65,8 @@ namespace Subtext {
 		// Maximum amount of results returned by a query.
 		public static int pageSize = 500;
 		
-		
+		// If true, the server will redirect all HTTP requests to HTTPS
+		public static bool requireHttps = true;
 		
 		// End of configuration options
 		

@@ -64,8 +64,10 @@ namespace Subtext {
 			if (env.IsDevelopment()) {
 				app.UseDeveloperExceptionPage();
 			}
-			
-			app.UseHttpsRedirection();
+
+			if (Config.requireHttps) {
+				app.UseHttpsRedirection();
+			}
 			
 			app.UseRouting();
 			

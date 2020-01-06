@@ -63,7 +63,7 @@ namespace Subtext {
 		public static string sqlCredsFile = "db.creds";
 		
 		// Maximum amount of results returned by a query.
-		public static int pageSize = 500;
+		public static int pageSize = 100;
 		
 		// Messages larger than this will not have their content returned by BoardController.GetMessages
 		public static int maxInlineMessageSize = 2048;

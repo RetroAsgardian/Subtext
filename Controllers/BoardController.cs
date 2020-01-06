@@ -406,7 +406,9 @@ namespace Subtext.Controllers {
 			Guid sessionId,
 			Guid boardId,
 			int? start = null,
-			int? count = null
+			int? count = null,
+			string type = null,
+			bool onlySystem = false
 		) {
 			(SessionVerificationResult verificationResult, Session session) = await new UserController(context).VerifyAndRenewSession(sessionId);
 			
@@ -438,6 +440,8 @@ namespace Subtext.Controllers {
 			return StatusCode(200, await context.Messages
 				.Where(m => m.BoardId == boardId)
 				.OrderByDescending(m => m.Timestamp)
+				.Where(m => type != null ? m.Type == type : true)
+				.Where(m => onlySystem ? m.IsSystem : true)
 				.Skip(start.GetValueOrDefault(0))
 				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
 				.Select(m => new {m.Id, m.Timestamp, m.AuthorId, m.IsSystem, m.Type, m.Content})

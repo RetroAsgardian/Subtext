@@ -127,7 +127,7 @@ namespace Subtext.Controllers {
 				(b.OwnerId == recipientId && b.Name == name2)
 			));
 			if (await dmBoards.AnyAsync()) {
-				return StatusCode(409, (await dmBoards.FirstAsync()).Id);
+				return StatusCode(200, (await dmBoards.FirstAsync()).Id);
 			}
 			
 			Board board = new Board();

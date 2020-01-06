@@ -65,11 +65,11 @@ namespace Subtext.Controllers {
 				Response.Headers.Add("WWW-Authenticate", "X-Subtext-User");
 				return StatusCode(401, new APIError("AuthError"));
 			}
-			
+			/*
 			if (await context.Boards.AnyAsync(b => b.Name == name)) {
 				return StatusCode(409, new APIError("NameTaken"));
 			}
-			
+			*/
 			if (!reName.IsMatch(name)) {
 				return StatusCode(400, new APIError("NameInvalid"));
 			}

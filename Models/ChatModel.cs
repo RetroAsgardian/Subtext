@@ -352,8 +352,7 @@ namespace Subtext.Models {
 				.HasForeignKey(pk => pk.OwnerId);
 			
 			builder.Entity<Board>()
-				.HasIndex(b => b.Name)
-				.IsUnique();
+				.HasIndex(b => b.Name);
 			
 			builder.Entity<Message>()
 				.HasIndex(m => m.BoardId);

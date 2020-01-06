@@ -330,10 +330,7 @@ namespace Subtext.Controllers {
 			msg.Timestamp = DateTime.UtcNow;
 			msg.IsSystem = true;
 			msg.Type = "AddMember";
-			var msgData = new {
-				UserId = userId
-			};
-			msg.Content = JsonSerializer.SerializeToUtf8Bytes(msgData, msgData.GetType());
+			msg.Content = System.Text.Encoding.UTF8.GetBytes(userId.ToString());
 			
 			await context.Messages.AddAsync(msg);
 			
@@ -388,10 +385,7 @@ namespace Subtext.Controllers {
 			msg.Timestamp = DateTime.UtcNow;
 			msg.IsSystem = true;
 			msg.Type = "RemoveMember";
-			var msgData = new {
-				UserId = userId
-			};
-			msg.Content = JsonSerializer.SerializeToUtf8Bytes(msgData, msgData.GetType());
+			msg.Content = System.Text.Encoding.UTF8.GetBytes(userId.ToString());
 			
 			await context.Messages.AddAsync(msg);
 			

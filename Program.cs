@@ -27,7 +27,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Subtext {
 	public class Program {
-		public static readonly string version = "0.1.0";
+		public static readonly string version = "0.1.1";
 		public static readonly string variant = "RetroAsgardian/Subtext";
 		
 		// HACK prevent migration when EF CLI tool hijacks ChatModel

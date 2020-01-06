@@ -183,7 +183,7 @@ namespace Subtext.Controllers {
 					.Where(b => b.OwnerId == session.UserId)
 					.OrderBy(b => b.Id)
 					.Skip(start.GetValueOrDefault(0))
-					.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+					.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate})
 					.ToListAsync());
 			} else {
@@ -192,7 +192,7 @@ namespace Subtext.Controllers {
 					.Join(context.Boards, mr => mr.BoardId, b => b.Id, (mr, b) => b)
 					.OrderBy(b => b.Id)
 					.Skip(start.GetValueOrDefault(0))
-					.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+					.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate})
 					.ToListAsync());
 			}
@@ -271,7 +271,7 @@ namespace Subtext.Controllers {
 				.Where(mr => mr.BoardId == boardId)
 				.OrderBy(mr => mr.UserId)
 				.Skip(start.GetValueOrDefault(0))
-				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 				.Select(mr => mr.UserId)
 				.ToListAsync());
 		}
@@ -443,8 +443,15 @@ namespace Subtext.Controllers {
 				.Where(m => type != null ? m.Type == type : true)
 				.Where(m => onlySystem ? m.IsSystem : true)
 				.Skip(start.GetValueOrDefault(0))
-				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
-				.Select(m => new {m.Id, m.Timestamp, m.AuthorId, m.IsSystem, m.Type, m.Content})
+				.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
+				.Select(m => new {
+					m.Id,
+					m.Timestamp,
+					m.AuthorId,
+					m.IsSystem,
+					m.Type,
+					Content = m.Content.Length > Config.maxInlineMessageSize ? (byte[]) null : m.Content
+				})
 				.ToListAsync());
 		}
 		

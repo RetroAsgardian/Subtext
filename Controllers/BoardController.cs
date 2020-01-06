@@ -184,7 +184,7 @@ namespace Subtext.Controllers {
 					.OrderBy(b => b.Id)
 					.Skip(start.GetValueOrDefault(0))
 					.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
-					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate})
+					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate, b.IsDirect})
 					.ToListAsync());
 			} else {
 				return StatusCode(200, await context.MemberRecords
@@ -193,7 +193,7 @@ namespace Subtext.Controllers {
 					.OrderBy(b => b.Id)
 					.Skip(start.GetValueOrDefault(0))
 					.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
-					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate})
+					.Select(b => new {b.Id, b.Name, b.OwnerId, b.Encryption, b.LastUpdate, b.LastSignificantUpdate, b.IsDirect})
 					.ToListAsync());
 			}
 		}
@@ -230,7 +230,7 @@ namespace Subtext.Controllers {
 				return StatusCode(403, new APIError("NotAuthorized"));
 			}
 			
-			return StatusCode(200, new {board.Id, board.Name, board.OwnerId, board.Encryption, board.LastUpdate, board.LastSignificantUpdate});
+			return StatusCode(200, new {board.Id, board.Name, board.OwnerId, board.Encryption, board.LastUpdate, board.LastSignificantUpdate, board.IsDirect});
 		}
 		
 		[HttpGet("{boardId}/members")]

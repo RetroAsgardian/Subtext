@@ -65,14 +65,14 @@ namespace Subtext.Controllers {
 				return StatusCode(400, new APIError("NameInvalid"));
 			}
 			
-			if (password.Length < Subtext.Config.passwordMinLength) {
+			if (password.Length < Config.passwordMinLength) {
 				return StatusCode(400, new APIError("PasswordInsecure"));
 			}
 			
 			User user = new User();
 			user.Name = name;
 			
-			byte[] salt = new byte[Subtext.Config.secretSize];
+			byte[] salt = new byte[Config.secretSize];
 			rng.GetBytes(salt);
 			
 			byte[] pepper = new byte[1];
@@ -80,13 +80,13 @@ namespace Subtext.Controllers {
 			
 			byte[] combinedSalt = salt.Concat(pepper).ToArray();
 			
-			Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, combinedSalt, Subtext.Config.pbkdf2Iterations);
-			byte[] secret = pbkdf2.GetBytes(Subtext.Config.secretSize);
+			Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, combinedSalt, Config.pbkdf2Iterations);
+			byte[] secret = pbkdf2.GetBytes(Config.secretSize);
 			
 			user.Secret = secret;
 			user.Salt = salt;
 			
-			if (Subtext.Config.serverIsPrivate) {
+			if (Config.serverIsPrivate) {
 				user.IsLocked = true;
 				user.LockReason = "AccountNotValidated";
 				user.LockExpiry = DateTime.MaxValue;
@@ -145,14 +145,14 @@ namespace Subtext.Controllers {
 			
 			bool passwordMatch = false;
 			
-			byte[] combinedSalt = new byte[Subtext.Config.secretSize + 1];
+			byte[] combinedSalt = new byte[Config.secretSize + 1];
 			user.Salt.CopyTo(combinedSalt, 0);
 			
 			for (int pepper = 0; pepper < 256; pepper++) {
 				combinedSalt[combinedSalt.Length - 1] = (byte) pepper;
-				Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, combinedSalt, Subtext.Config.pbkdf2Iterations);
+				Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, combinedSalt, Config.pbkdf2Iterations);
 				pbkdf2.Salt = combinedSalt;
-				byte[] secret = pbkdf2.GetBytes(Subtext.Config.secretSize);
+				byte[] secret = pbkdf2.GetBytes(Config.secretSize);
 				if (secret.SequenceEqual(user.Secret)) {
 					passwordMatch = true;
 					break;
@@ -161,12 +161,12 @@ namespace Subtext.Controllers {
 			
 			if (!passwordMatch) {
 				user.IncorrectGuesses += 1;
-				if (user.IncorrectGuesses >= Subtext.Config.passwordMaxAttempts) {
+				if (user.IncorrectGuesses >= Config.passwordMaxAttempts) {
 					user.IncorrectGuesses = 0;
 					user.IsLocked = true;
 					// Log the IP address
 					user.LockReason = "TooManyPasswordAttempts " + Request.HttpContext.Connection.RemoteIpAddress.ToString();
-					user.LockExpiry = DateTime.UtcNow.Add(Subtext.Config.passwordLockTime);
+					user.LockExpiry = DateTime.UtcNow.Add(Config.passwordLockTime);
 				}
 				await context.SaveChangesAsync();
 				
@@ -194,7 +194,7 @@ namespace Subtext.Controllers {
 				return (SessionVerificationResult.SessionNotFound, null);
 			}
 			
-			if (session.Timestamp + Subtext.Config.sessionDuration < DateTime.UtcNow) {
+			if (session.Timestamp + Config.sessionDuration < DateTime.UtcNow) {
 				context.Sessions.Remove(session);
 				await context.SaveChangesAsync();
 				return (SessionVerificationResult.SessionExpired, session);
@@ -262,7 +262,7 @@ namespace Subtext.Controllers {
 			
 			context.Sessions.Remove(session);
 			
-			DateTime expiryCutoff = DateTime.UtcNow.Subtract(Subtext.Config.sessionDuration);
+			DateTime expiryCutoff = DateTime.UtcNow.Subtract(Config.sessionDuration);
 			if (await context.Sessions.Where(s => s.UserId == user.Id && s.Timestamp >= expiryCutoff).CountAsync() == 0) {
 				user.Presence = UserPresence.Offline;
 			}
@@ -341,14 +341,14 @@ namespace Subtext.Controllers {
 			}
 			
 			if (count.HasValue && count <= 0) {
-				count = Subtext.Config.pageSize;
+				count = Config.pageSize;
 			}
 			
 			return StatusCode(200, await context.FriendRecords
 				.Where(fr => fr.OwnerId == userId)
 				.OrderBy(fr => fr.FriendId)
 				.Skip(start.GetValueOrDefault(0))
-				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 				.Select(fr => fr.FriendId)
 				.ToListAsync());
 		}
@@ -431,14 +431,14 @@ namespace Subtext.Controllers {
 			}
 			
 			if (count.HasValue && count <= 0) {
-				count = Subtext.Config.pageSize;
+				count = Config.pageSize;
 			}
 			
 			return StatusCode(200, await context.BlockRecords
 				.Where(br => br.OwnerId == userId)
 				.OrderBy(br => br.BlockedId)
 				.Skip(start.GetValueOrDefault(0))
-				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 				.Select(br => br.BlockedId)
 				.ToListAsync());
 		}
@@ -564,14 +564,14 @@ namespace Subtext.Controllers {
 			}
 			
 			if (count.HasValue && count <= 0) {
-				count = Subtext.Config.pageSize;
+				count = Config.pageSize;
 			}
 			
 			return StatusCode(200, await context.FriendRequests
 				.Where(fr => fr.RecipientId == userId)
 				.OrderBy(fr => fr.SenderId)
 				.Skip(start.GetValueOrDefault(0))
-				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 				.Select(fr => fr.SenderId)
 				.ToListAsync());
 		}
@@ -748,14 +748,14 @@ namespace Subtext.Controllers {
 			}
 			
 			if (count.HasValue && count <= 0) {
-				count = Subtext.Config.pageSize;
+				count = Config.pageSize;
 			}
 			
 			return StatusCode(200, await context.PublicKeys
 				.Where(pk => pk.OwnerId == userId)
 				.OrderByDescending(pk => pk.PublishTime)
 				.Skip(start.GetValueOrDefault(0))
-				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 				.Select(pk => new {pk.Id, pk.PublishTime})
 				.ToListAsync());
 		}
@@ -892,14 +892,14 @@ namespace Subtext.Controllers {
 			
 			bool passwordMatch = false;
 			
-			byte[] combinedSalt = new byte[Subtext.Config.secretSize + 1];
+			byte[] combinedSalt = new byte[Config.secretSize + 1];
 			user.Salt.CopyTo(combinedSalt, 0);
 			
 			for (int pepper = 0; pepper < 256; pepper++) {
 				combinedSalt[combinedSalt.Length - 1] = (byte) pepper;
-				Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, combinedSalt, Subtext.Config.pbkdf2Iterations);
+				Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(password, combinedSalt, Config.pbkdf2Iterations);
 				pbkdf2.Salt = combinedSalt;
-				byte[] secret = pbkdf2.GetBytes(Subtext.Config.secretSize);
+				byte[] secret = pbkdf2.GetBytes(Config.secretSize);
 				if (secret.SequenceEqual(user.Secret)) {
 					passwordMatch = true;
 					break;

@@ -20,6 +20,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Subtext.Models;
+using System.Text.Json;
 
 namespace Subtext.Controllers {
 	[Produces("application/json")]
@@ -41,6 +42,9 @@ namespace Subtext.Controllers {
 			if (key == null) {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
+			
+			var metadata = new {key.Id, key.PublishTime, key.OwnerId};
+			Response.Headers.Add("X-Metadata", JsonSerializer.Serialize(metadata, metadata.GetType()));
 			
 			return StatusCode(200, key.KeyData);
 		}

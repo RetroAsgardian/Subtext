@@ -51,7 +51,7 @@ namespace Subtext.Controllers {
 				return StatusCode(403, new APIError("AdminLoggedIn"));
 			}
 			
-			byte[] challenge = new byte[Subtext.Config.secretSize];
+			byte[] challenge = new byte[Config.secretSize];
 			rng.GetBytes(challenge);
 			admin.Challenge = challenge;
 			
@@ -74,8 +74,8 @@ namespace Subtext.Controllers {
 				return StatusCode(403, new APIError("AdminLoggedIn"));
 			}
 			
-			Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(admin.Secret, admin.Challenge, Subtext.Config.pbkdf2Iterations);
-			byte[] expectedResponse = pbkdf2.GetBytes(Subtext.Config.secretSize);
+			Rfc2898DeriveBytes pbkdf2 = new Rfc2898DeriveBytes(admin.Secret, admin.Challenge, Config.pbkdf2Iterations);
+			byte[] expectedResponse = pbkdf2.GetBytes(Config.secretSize);
 			
 			if (response.SequenceEqual(expectedResponse)) {
 				AdminSession session = new AdminSession();
@@ -85,7 +85,7 @@ namespace Subtext.Controllers {
 				
 				admin.IsLoggedIn = true;
 				
-				byte[] challenge = new byte[Subtext.Config.secretSize];
+				byte[] challenge = new byte[Config.secretSize];
 				rng.GetBytes(challenge);
 				admin.Challenge = challenge;
 				
@@ -97,7 +97,7 @@ namespace Subtext.Controllers {
 			} else {
 				await LogAdminAction(admin, "Login.Failure", "");
 				
-				byte[] challenge = new byte[Subtext.Config.secretSize];
+				byte[] challenge = new byte[Config.secretSize];
 				rng.GetBytes(challenge);
 				admin.Challenge = challenge;
 				
@@ -125,7 +125,7 @@ namespace Subtext.Controllers {
 				return (SessionVerificationResult.SessionNotFound, null);
 			}
 			
-			if (session.Timestamp + Subtext.Config.adminSessionDuration < DateTime.UtcNow) {
+			if (session.Timestamp + Config.adminSessionDuration < DateTime.UtcNow) {
 				return (SessionVerificationResult.SessionExpired, session);
 			}
 			
@@ -271,7 +271,7 @@ namespace Subtext.Controllers {
 			}
 			
 			if (count.HasValue && count <= 0) {
-				count = Subtext.Config.pageSize;
+				count = Config.pageSize;
 			}
 			
 			return StatusCode(200, await context.AuditLog
@@ -281,7 +281,7 @@ namespace Subtext.Controllers {
 				.Where(ale => startTime.HasValue ? ale.Timestamp >= startTime : true)
 				.Where(ale => endTime.HasValue ? ale.Timestamp <= endTime : true)
 				.Skip(start.GetValueOrDefault(0))
-				.Take(Math.Min(Subtext.Config.pageSize, count.GetValueOrDefault(Subtext.Config.pageSize)))
+				.Take(Math.Min(Config.pageSize, count.GetValueOrDefault(Config.pageSize)))
 				.Select(ale => new {ale.Id, ale.AdminId, ale.Action, ale.Details, ale.Timestamp})
 				.ToListAsync());
 		}

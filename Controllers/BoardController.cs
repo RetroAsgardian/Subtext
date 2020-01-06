@@ -497,6 +497,9 @@ namespace Subtext.Controllers {
 				return StatusCode(404, new APIError("NoObjectWithId"));
 			}
 			
+			var metadata = new {msg.Id, msg.Timestamp, msg.AuthorId, msg.IsSystem, msg.Type};
+			Response.Headers.Add("X-Metadata", JsonSerializer.Serialize(metadata, metadata.GetType()));
+			
 			return StatusCode(200, msg.Content);
 		}
 		

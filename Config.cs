@@ -25,12 +25,12 @@ namespace Subtext {
 	// This should probably become a separate config file.
 	public class Config {
 		
-		// Server name. Used to identify this server.
-		public static string serverName = "subtext_testing";
+		// Used along with the instance ID to uniquely identify this instance.
+		public static string instanceName = "subtext_testing";
 		
 		// If this is enabled, users will be locked until they are manually
 		// verified by the admins.
-		public static bool serverIsPrivate = false;
+		public static bool instanceIsPrivate = false;
 		
 		// Size (in bytes) of secrets, salts, challenges, and responses
 		// This should be AT LEAST 16. 32 should be more than enough.
@@ -71,16 +71,21 @@ namespace Subtext {
 		// If true, the server will redirect all HTTP requests to HTTPS
 		public static bool requireHttps = false;
 		
-		// End of configuration options
+		// This file is automatically created by Subtext, please don't create or edit it manually
+		public static string instanceIdFile = "instance_id.creds";
+		
+		// END of configuration options
 		
 		public static string sqlUser;
 		public static string sqlPassword;
+		
+		public static Guid instanceId;
 		
 		public static bool IsInit { get; private set; }
 		
 		public static void Init() {
 			InitCreds();
-			// TODO initialize more stuff?
+			InitInstanceId();
 			
 			IsInit = true;
 		}
@@ -90,6 +95,21 @@ namespace Subtext {
 			using (StreamReader fh = new StreamReader(sqlCredsFile)) {
 				sqlUser = fh.ReadLine().Trim();
 				sqlPassword = fh.ReadLine().Trim();
+			}
+		}
+		
+		public static void InitInstanceId() {
+			if (!File.Exists(instanceIdFile)) {
+				// Generate instance ID and save it
+				instanceId = Guid.NewGuid();
+				using (StreamWriter fh = new StreamWriter(instanceIdFile)) {
+					fh.WriteLine(instanceId.ToString());
+				}
+			} else {
+				// Load instance ID
+				using (StreamReader fh = new StreamReader(instanceIdFile)) {
+					instanceId = Guid.Parse(fh.ReadLine().Trim());
+				}
 			}
 		}
 		

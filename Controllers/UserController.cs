@@ -86,7 +86,7 @@ namespace Subtext.Controllers {
 			user.Secret = secret;
 			user.Salt = salt;
 			
-			if (Config.serverIsPrivate) {
+			if (Config.instanceIsPrivate) {
 				user.IsLocked = true;
 				user.LockReason = "AccountNotValidated";
 				user.LockExpiry = DateTime.MaxValue;

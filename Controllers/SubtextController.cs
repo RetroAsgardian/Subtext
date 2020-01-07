@@ -71,8 +71,9 @@ namespace Subtext.Controllers {
 			result.Add("version", Subtext.Program.version);
 			result.Add("variant", Subtext.Program.variant);
 			
-			result.Add("serverName", Subtext.Config.serverName);
-			result.Add("serverIsPrivate", Subtext.Config.serverIsPrivate);
+			result.Add("instanceName", Subtext.Config.instanceName);
+			result.Add("instanceId", Subtext.Config.instanceId);
+			result.Add("instanceIsPrivate", Subtext.Config.instanceIsPrivate);
 			
 			result.Add("sessionDuration", Subtext.Config.sessionDuration.TotalSeconds);
 			

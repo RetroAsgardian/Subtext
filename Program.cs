@@ -44,6 +44,10 @@ namespace Subtext {
 			Console.WriteLine();
 			
 			Config.Init();
+			
+			Console.WriteLine("Instance ID: " + Config.instanceId.ToString());
+			Console.WriteLine();
+			
 			CreateHostBuilder(args).Build().Run();
 		}
 		

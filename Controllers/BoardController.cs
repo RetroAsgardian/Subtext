@@ -435,7 +435,7 @@ namespace Subtext.Controllers {
 			return StatusCode(200, await context.Messages
 				.Where(m => m.BoardId == boardId)
 				.OrderByDescending(m => m.Timestamp)
-				.Where(m => sinceTime.HasValue ? m.Timestamp >= sinceTime.Value : true)
+				.Where(m => sinceTime.HasValue ? m.Timestamp >= sinceTime : true)
 				.Where(m => type != null ? m.Type == type : true)
 				.Where(m => onlySystem ? m.IsSystem : true)
 				.Skip(start.GetValueOrDefault(0))
